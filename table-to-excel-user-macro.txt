@@ -57,7 +57,7 @@ if(typeof exportToEXCEL != 'function') {
         return json;
     }
 
-    function exportToEXCEL(button, title)
+    function exportToEXCEL(button, title, url)
     {
         var detected = false;
 
@@ -70,7 +70,7 @@ if(typeof exportToEXCEL != 'function') {
 
         var form = document.createElement("form");
         form.setAttribute("method", "post");
-        form.setAttribute("action", "http://fhds:1990/confluence/plugins/servlet/tabletoexcel");
+        form.setAttribute("action", url);
         form.setAttribute("target", "_blank");
 
         var idField = document.createElement("input");
@@ -95,7 +95,7 @@ if(typeof exportToEXCEL != 'function') {
 <div id="$paramtableid">
     $body
     <button class="ui-button ui-state-active ui-corner-all" style="HEIGHT: 30px"
-            onClick="exportToEXCEL(this, 'Export to Excel')">Export to Excel</button>
+            onClick="exportToEXCEL(this, 'Export to Excel', '$action.getGlobalSettings().getBaseUrl()/plugins/servlet/tabletoexcel')">Export to Excel</button>
 </div>
 
 #end
