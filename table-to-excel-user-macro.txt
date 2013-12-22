@@ -28,26 +28,25 @@ if(typeof exportToEXCEL != 'function') {
         var prevIsTd = false;
 
         var obj = { rows: [] };
-
-        jQuery('tr', table).each(function()
+		$('tr').not("td div table thead tr").not("td div table tbody tr").each(function()
         {
             beginRow = true;
-
+			isNestedTable = false;
+			
             currentRow = { isHeaderRow: false, cells: [] }
 
             jQuery(this).children().each(function ()
             {
-                if (jQuery(this).is("th"))
+                if (jQuery(this).is("th") && !isNestedTable)
                 {
                     currentRow.isHeaderRow = true;
                     currentRow.cells.push(jQuery(this).text());
-                    prevIsTd = false;
                 }
-                else if (jQuery(this).is("td"))
+                else if (jQuery(this).is("td") && !isNestedTable)
                 {
                     currentRow.cells.push(jQuery(this).text());
-                    prevIsTd = true;
                 }
+				
                 beginRow = false;
             });
             obj.rows.push(currentRow);
@@ -65,8 +64,8 @@ if(typeof exportToEXCEL != 'function') {
 
         //var data = jQuery(id).html();
         //var body = String("$body");
-        var data = exportTableToText(table);
         //window.open('http://fhds:1990/confluence/plugins/servlet/tabletoexcel' + '?id=ExcelExport' + '&tabledata=' + encodeURIComponent(data),"");
+        var data = exportTableToText(table);
 
         var form = document.createElement("form");
         form.setAttribute("method", "post");
