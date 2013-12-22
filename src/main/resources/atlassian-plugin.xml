@@ -1,0 +1,39 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}"
+	name="${project.name}" plugins-version="2">
+	<plugin-info>
+		<description>${project.description}</description>
+		<version>${project.version}</version>
+		<vendor name="${project.organization.name}" url="${project.organization.url}" />
+		<param name="plugin-icon">images/pluginIcon.png</param>
+		<param name="plugin-logo">images/pluginLogo.png</param>
+	</plugin-info>
+
+	<!-- add our i18n resource -->
+	<resource type="i18n" name="i18n" location="table-to-excel" />
+
+	<!-- add our web resources -->
+	<web-resource key="table-to-excel-resources" name="table-to-excel Web Resources">
+		<dependency>com.atlassian.auiplugin:ajs</dependency>
+
+		<resource type="download" name="table-to-excel.css" location="/css/table-to-excel.css" />
+		<resource type="download" name="table-to-excel.js" location="/js/table-to-excel.js" />
+		<resource type="download" name="images/" location="/images" />
+
+		<context>table-to-excel</context>
+	</web-resource>
+
+	<!-- publish our component -->
+	<component key="myPluginComponent"
+		class="de.cranktheory.confluence.excel.MyPluginComponentImpl" public="true">
+		<interface>de.cranktheory.confluence.excel.MyPluginComponent
+		</interface>
+	</component>
+	<servlet name="tableToExcel"
+		class="de.cranktheory.confluence.excel.TableToExcelServlet" key="tabletoexcel">
+		<url-pattern>/tabletoexcel</url-pattern>
+	</servlet>
+	<!-- import from the product container -->
+	<component-import key="applicationProperties"
+		interface="com.atlassian.sal.api.ApplicationProperties" />
+
+</atlassian-plugin>

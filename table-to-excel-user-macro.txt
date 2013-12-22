@@ -1,0 +1,101 @@
+## Macro name: export-to-excel
+##
+## Original development by: Florian Herbel on 21/12/2013
+##
+## Export confluence table to excel spreed sheets using the table-to-excel plugin.
+## @param tableid:title=TableId|type=string|required=true|desc=Id of the table
+
+#if ($action.isPrintableVersion())
+$body
+#else
+<script type="text/javascript">
+if(typeof exportToEXCEL != 'function') {
+    function strip_tags (input, allowed) {
+        allowed = (((allowed || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
+
+        var tags = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi,
+        commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+
+        return input.replace(commentsAndPhpTags, '').replace(tags, function ($0, $1) {
+                return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+        }).replace(/\r\n/gi, "");
+    }
+
+    var exportTableToText = function (table) {
+        var text = '';
+        var begin = true;
+        var beginRow;
+        var prevIsTd = false;
+
+        var obj = { rows: [] };
+
+        jQuery('tr', table).each(function()
+        {
+            beginRow = true;
+
+            currentRow = { isHeaderRow: false, cells: [] }
+
+            jQuery(this).children().each(function ()
+            {
+                if (jQuery(this).is("th"))
+                {
+                    currentRow.isHeaderRow = true;
+                    currentRow.cells.push(jQuery(this).text());
+                    prevIsTd = false;
+                }
+                else if (jQuery(this).is("td"))
+                {
+                    currentRow.cells.push(jQuery(this).text());
+                    prevIsTd = true;
+                }
+                beginRow = false;
+            });
+            obj.rows.push(currentRow);
+        });
+        var json = JSON.stringify(obj);
+
+        return json;
+    }
+
+    function exportToEXCEL(button, title)
+    {
+        var detected = false;
+
+        var table = jQuery(button.parentNode).find("table");
+
+        //var data = jQuery(id).html();
+        //var body = String("$body");
+        var data = exportTableToText(table);
+        //window.open('http://fhds:1990/confluence/plugins/servlet/tabletoexcel' + '?id=ExcelExport' + '&tabledata=' + encodeURIComponent(data),"");
+
+        var form = document.createElement("form");
+        form.setAttribute("method", "post");
+        form.setAttribute("action", "http://fhds:1990/confluence/plugins/servlet/tabletoexcel");
+        form.setAttribute("target", "_blank");
+
+        var idField = document.createElement("input");
+        idField.setAttribute("type", "hidden");
+        idField.setAttribute("name", "id");
+        idField.setAttribute("value", title);
+        form.appendChild(idField);
+
+        var dataField = document.createElement("input");
+        dataField.setAttribute("type", "hidden");
+        dataField.setAttribute("name", "tabledata");
+        dataField.setAttribute("value", data);
+        form.appendChild(dataField);
+
+        document.body.appendChild(form);
+        form.submit();
+
+        return true;
+    }
+}
+</script>
+<div id="$paramtableid">
+    $body
+    <button class="ui-button ui-state-active ui-corner-all" style="HEIGHT: 30px"
+            onClick="exportToEXCEL(this, 'Export to Excel')">Export to Excel</button>
+</div>
+
+#end
