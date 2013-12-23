@@ -24,7 +24,7 @@ if(typeof exportToEXCEL != 'function') {
     var exportTableToText = function (table, url) {
 
         var obj = { rows: [] };
-		$('tr').not("td div table thead tr").not("td div table tbody tr").each(function()
+		$('tr', table).not("td div table thead tr").not("td div table tbody tr").each(function()
         {			
             currentRow = { isHeaderRow: false, cells: [] }
 
