@@ -3,7 +3,7 @@
 ## Original development by: Florian Herbel on 21/12/2013
 ##
 ## Export confluence table to excel spreed sheets using the table-to-excel plugin.
-## @param tableid:title=TableId|type=string|required=true|desc=Id of the table
+## @param tableid:title=TableId|type=string|required=false|desc=Id of the table
 
 #if ($action.isPrintableVersion())
 $body
@@ -21,33 +21,31 @@ if(typeof exportToEXCEL != 'function') {
         }).replace(/\r\n/gi, "");
     }
 
-    var exportTableToText = function (table) {
-        var text = '';
-        var begin = true;
-        var beginRow;
-        var prevIsTd = false;
+    var exportTableToText = function (table, url) {
 
         var obj = { rows: [] };
 		$('tr').not("td div table thead tr").not("td div table tbody tr").each(function()
-        {
-            beginRow = true;
-			isNestedTable = false;
-			
+        {			
             currentRow = { isHeaderRow: false, cells: [] }
 
             jQuery(this).children().each(function ()
             {
-                if (jQuery(this).is("th") && !isNestedTable)
+				var isHeader = jQuery(this).is("th");
+				var isCell = jQuery(this).is("td");
+                if (isHeader || isCell)
                 {
-                    currentRow.isHeaderRow = true;
-                    currentRow.cells.push(jQuery(this).text());
+					if(isHeader) {
+						currentRow.isHeaderRow = true;
+					}
+					var content = jQuery(this).text();
+					var currentCell = { text: content }
+                    currentRow.cells.push(currentCell);
+					
+					var imgChildren = jQuery(this).find('img');
+					if(imgChildren.length > 0) {
+						currentCell.iconUrl = imgChildren[0].src;
+					}
                 }
-                else if (jQuery(this).is("td") && !isNestedTable)
-                {
-                    currentRow.cells.push(jQuery(this).text());
-                }
-				
-                beginRow = false;
             });
             obj.rows.push(currentRow);
         });
@@ -62,10 +60,7 @@ if(typeof exportToEXCEL != 'function') {
 
         var table = jQuery(button.parentNode).find("table");
 
-        //var data = jQuery(id).html();
-        //var body = String("$body");
-        //window.open('http://fhds:1990/confluence/plugins/servlet/tabletoexcel' + '?id=ExcelExport' + '&tabledata=' + encodeURIComponent(data),"");
-        var data = exportTableToText(table);
+        var data = exportTableToText(table, url);
 
         var form = document.createElement("form");
         form.setAttribute("method", "post");
@@ -91,7 +86,7 @@ if(typeof exportToEXCEL != 'function') {
     }
 }
 </script>
-<div id="$paramtableid">
+<div>
     $body
     <button class="ui-button ui-state-active ui-corner-all" style="HEIGHT: 30px"
             onClick="exportToEXCEL(this, 'Export to Excel', '$action.getGlobalSettings().getBaseUrl()/plugins/servlet/tabletoexcel')">Export to Excel</button>

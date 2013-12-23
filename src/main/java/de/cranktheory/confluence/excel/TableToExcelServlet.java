@@ -2,14 +2,22 @@ package de.cranktheory.confluence.excel;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Picture;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.IOUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -18,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -83,7 +90,8 @@ public class TableToExcelServlet extends HttpServlet
 
             for (int rowIDX = 0; rowIDX < rows.size(); ++rowIDX)
             {
-                JsonObject jsonRow = rows.get(rowIDX).getAsJsonObject();
+                JsonObject jsonRow = rows.get(rowIDX)
+                    .getAsJsonObject();
                 System.out.println("TableToExcel found new row: " + jsonRow);
 
                 boolean isHeader = jsonRow.get("isHeaderRow")
@@ -96,16 +104,39 @@ public class TableToExcelServlet extends HttpServlet
 
                 for (int i = 0; i < cells.size(); i++)
                 {
-                    String cellValue = cells.get(i)
-                        .getAsString();
+                    JsonObject cellJsonObject = cells.get(i)
+                        .getAsJsonObject();
 
-                    System.out.println("TableToExcel found new cell: " + cellValue);
+                    XSSFCell cell = currentRow.createCell(i);
+                    if (cellJsonObject.has("iconUrl"))
+                    {
+                        {
+                            URL iconUrl = new URL(cellJsonObject.get("iconUrl")
+                                .getAsString());
 
-                    currentRow.createCell(i)
-                        .setCellValue(cellValue);
+                            InputStream iconStream = iconUrl.openStream();
+                            byte[] bytes = IOUtils.toByteArray(iconStream);
+                            iconStream.close();
+
+                            int pictureIdx = workBook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+                            Drawing drawing = sheet.createDrawingPatriarch();
+                            ClientAnchor anchor = workBook.getCreationHelper()
+                                .createClientAnchor();
+                            anchor.setCol1(cell.getColumnIndex());
+                            anchor.setRow1(cell.getRowIndex());
+                            Picture pict = drawing.createPicture(anchor, pictureIdx);
+                            pict.resize();
+                        }
+                    }
+                    else
+                    {
+                        String cellValue = cellJsonObject.get("text")
+                            .getAsString();
+                        cell.setCellValue(cellValue);
+                        System.out.println("TableToExcel found new cell: " + cellValue);
+                    }
                 }
             }
-
             return workBook;
         }
         catch (Exception ex)
