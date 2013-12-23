@@ -1,10 +1,9 @@
 package de.cranktheory.confluence.excel;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.ServletException;
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.IOUtils;
@@ -35,167 +33,124 @@ public class TableToExcelServlet extends HttpServlet
     private static final Logger log = LoggerFactory.getLogger(TableToExcelServlet.class);
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
-
-    {
-        String id = req.getParameter("id");
-        String tableData = req.getParameter("tabledata");
-
-        handleRequest(resp, id, tableData);
-    }
-
-    @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
         String id = req.getParameter("id");
         String tableData = req.getParameter("tabledata");
 
-        handleRequest(resp, id, tableData);
-    }
-
-    private void handleRequest(HttpServletResponse resp, String id, String tableData) throws IOException
-    {
         log.info("TableData: " + tableData);
         System.out.println("TableToExcel id: " + id);
         System.out.println("TableToExcel tabledata: " + tableData);
 
         if (Strings.isNullOrEmpty(tableData)) tableData = "Parameter tabledata was null or empty.";
 
-        // You must tell the browser the file type you are going to send
-        // for example application/pdf, text/plain, text/html, image/jpg
         resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        // Make sure to show the download dialog
         resp.setHeader("Content-disposition", "attachment; filename=" + id + ".xlsx");
 
-        // This should send the file to browser
-        OutputStream out = resp.getOutputStream();
+        JsonObject jsonTable = new JsonParser().parse(tableData)
+            .getAsJsonObject();
 
-        // writeXlsxFromCSV(id, tableData, out);
-        XSSFWorkbook workBook = createWorkbookFromJson(id, tableData, out);
+        XSSFWorkbook workBook = new XSSFWorkbook();
+        XSSFSheet sheet = workBook.createSheet(id);
+
+        parseSheet(workBook, sheet, jsonTable);
+
+        OutputStream out = resp.getOutputStream();
         workBook.write(out);
         out.flush();
     }
 
-    public static XSSFWorkbook createWorkbookFromJson(String title, String json, OutputStream output)
+    public static void parseSheet(XSSFWorkbook workBook, XSSFSheet sheet, JsonObject jsonTable)
     {
-        try
-        {
-            XSSFWorkbook workBook = new XSSFWorkbook();
-            XSSFSheet sheet = workBook.createSheet(title);
+        JsonArray rows = jsonTable.getAsJsonArray("rows");
 
-            JsonObject root = new JsonParser().parse(json)
+        for (int rowIDX = 0; rowIDX < rows.size(); ++rowIDX)
+        {
+            JsonObject jsonRow = rows.get(rowIDX)
                 .getAsJsonObject();
-            JsonArray rows = root.getAsJsonArray("rows");
+            System.out.println("TableToExcel found new row: " + jsonRow);
 
-            for (int rowIDX = 0; rowIDX < rows.size(); ++rowIDX)
-            {
-                JsonObject jsonRow = rows.get(rowIDX)
-                    .getAsJsonObject();
-                System.out.println("TableToExcel found new row: " + jsonRow);
-
-                boolean isHeader = jsonRow.get("isHeaderRow")
-                    .getAsBoolean();
-
-                XSSFRow currentRow = sheet.createRow(rowIDX);
-
-                JsonArray cells = jsonRow.get("cells")
-                    .getAsJsonArray();
-
-                for (int i = 0; i < cells.size(); i++)
-                {
-                    JsonObject cellJsonObject = cells.get(i)
-                        .getAsJsonObject();
-
-                    XSSFCell cell = currentRow.createCell(i);
-                    if (cellJsonObject.has("iconUrl"))
-                    {
-                        {
-                            URL iconUrl = new URL(cellJsonObject.get("iconUrl")
-                                .getAsString());
-
-                            InputStream iconStream = iconUrl.openStream();
-                            byte[] bytes = IOUtils.toByteArray(iconStream);
-                            iconStream.close();
-
-                            int pictureIdx = workBook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
-                            Drawing drawing = sheet.createDrawingPatriarch();
-                            ClientAnchor anchor = workBook.getCreationHelper()
-                                .createClientAnchor();
-                            anchor.setCol1(cell.getColumnIndex());
-                            anchor.setRow1(cell.getRowIndex());
-                            Picture pict = drawing.createPicture(anchor, pictureIdx);
-                            pict.resize();
-                        }
-                    }
-                    else
-                    {
-                        String cellValue = cellJsonObject.get("text")
-                            .getAsString();
-                        cell.setCellValue(cellValue);
-                        System.out.println("TableToExcel found new cell: " + cellValue);
-                    }
-                }
-            }
-            return workBook;
-        }
-        catch (Exception ex)
-        {
-            System.out.println(ex.getMessage() + "Exception in try");
-            return new XSSFWorkbook();
+            parseRow(workBook, sheet, sheet.createRow(rowIDX), jsonRow);
         }
     }
 
-    public static XSSFWorkbook createWorkbookFromCSV(String title, String csv, OutputStream output)
+    private static void parseRow(XSSFWorkbook workBook, XSSFSheet sheet, XSSFRow row, JsonObject jsonRow)
     {
-        try
+        // boolean isHeader = jsonRow.get("isHeaderRow")
+        // .getAsBoolean();
+
+        JsonArray cells = jsonRow.get("cells")
+            .getAsJsonArray();
+
+        for (int i = 0; i < cells.size(); i++)
         {
-            XSSFWorkbook workBook = new XSSFWorkbook();
-            XSSFSheet sheet = workBook.createSheet(title);
-            String currentLine = null;
-            int rowNum = 0;
+            JsonObject cellJsonObject = cells.get(i)
+                .getAsJsonObject();
 
-            String csvWithLineBreaks = csv.replace("%0D%0A", "\r\n");
+            parseCell(workBook, sheet, row.createCell(i), cellJsonObject);
+        }
+    }
 
-            BufferedReader br = new BufferedReader(new StringReader(csvWithLineBreaks));
-
-            while ((currentLine = br.readLine()) != null)
+    private static void parseCell(XSSFWorkbook workBook, XSSFSheet sheet, XSSFCell cell, JsonObject jsonCell)
+    {
+        if (jsonCell.has("iconUrl"))
+        {
+            try
             {
-                System.out.println("TableToExcel found new line: " + currentLine);
+                URL iconUrl = new URL(jsonCell.get("iconUrl")
+                    .getAsString());
 
-                String[] headerCells = currentLine.split("||");
-                boolean hasHeaders = headerCells.length > 0;
+                String path = iconUrl.getPath();
 
-                String cells[] = currentLine.split("|");
-                boolean hasCells = cells.length > 0;
-
-                ++rowNum;
-                XSSFRow currentRow = sheet.createRow(rowNum);
-
-                if (hasHeaders)
+                if (path.contains("."))
                 {
-                    for (int i = 0; i < headerCells.length; i++)
+                    String extension = path.substring(path.lastIndexOf("."));
+
+                    if (!".png".equalsIgnoreCase(extension))
                     {
-                        currentRow.createCell(i)
-                            .setCellValue(headerCells[i]);
+                        System.out.println("TableToExcel - extension '" + extension + "' is currently not supported...");
+                        cell.setCellValue("Only png images supported");
                     }
-                }
-                else if (hasCells)
-                {
-                    for (int i = 0; i < cells.length; i++)
+                    else
                     {
-                        currentRow.createCell(i)
-                            .setCellValue(cells[i]);
+                        byte[] bytes = loadImageFromURL(iconUrl);
+
+                        int pictureIdx = workBook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+
+                        ClientAnchor anchor = workBook.getCreationHelper()
+                            .createClientAnchor();
+                        anchor.setCol1(cell.getColumnIndex());
+                        anchor.setRow1(cell.getRowIndex());
+
+                        Picture pict = sheet.createDrawingPatriarch()
+                            .createPicture(anchor, pictureIdx);
+                        pict.resize();
                     }
                 }
             }
-
-            return workBook;
+            catch (MalformedURLException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
-        catch (Exception ex)
+        else
         {
-            System.out.println(ex.getMessage() + "Exception in try");
-            return new XSSFWorkbook();
+            String cellValue = jsonCell.get("text")
+                .getAsString();
+            cell.setCellValue(cellValue);
+            System.out.println("TableToExcel found new cell: " + cellValue);
         }
+    }
+
+    private static byte[] loadImageFromURL(URL iconUrl) throws IOException
+    {
+        InputStream iconStream = iconUrl.openStream();
+        byte[] bytes = IOUtils.toByteArray(iconStream);
+        iconStream.close();
+        return bytes;
     }
 }
