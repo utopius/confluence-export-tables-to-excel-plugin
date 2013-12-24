@@ -2,7 +2,7 @@
 
 This plugin enables you to download tables on Confluence pages as Office Open XML / OOXML sheets.  
 
-The plugin consists of the following components:
+The plugin consists of the following components:  
 * A servlet which creates an Office Open XML (.xslx) Workbook from JSON
 * A user-macro which to decorate tables with a button to initiate the export
 
@@ -18,7 +18,7 @@ The plugin consists of the following components:
 
 ## Adding the macro
 Open the Confluence administration and go to the user macros section and create a new user macro.
-Enter:
+Enter:  
 * Macro Name: tabletoexcel
 * Macro Title: Table to Excel
 * Macro body processing: Rendered
