@@ -1,131 +1,169 @@
 package de.cranktheory.confluence.excel;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.IOUtils;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class TableToExcelServlet extends HttpServlet
 {
-
     private static final Logger log = LoggerFactory.getLogger(TableToExcelServlet.class);
+    private static final ImmutableMap<String, Integer> mimeTypeToPoiImageFormat;
+
+    static
+    {
+        Builder<String, Integer> builder = ImmutableMap.builder();
+        mimeTypeToPoiImageFormat = builder.put("image/jpg", Workbook.PICTURE_TYPE_JPEG)
+            .put("image/jpeg", Workbook.PICTURE_TYPE_JPEG)
+            .put("image/png", Workbook.PICTURE_TYPE_PNG)
+            .build();
+    }
+
+    private static boolean isImageTypeSupported(String mimeType)
+    {
+        return mimeTypeToPoiImageFormat.containsKey(mimeType);
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        String id = req.getParameter("id");
+        String title = req.getParameter("id");
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(title), "Request parameter 'id' is null or empty.");
+
         String tableData = req.getParameter("tabledata");
-
-        log.info("TableData: " + tableData);
-        System.out.println("TableToExcel id: " + id);
-        System.out.println("TableToExcel tabledata: " + tableData);
-
-        if (Strings.isNullOrEmpty(tableData)) tableData = "Parameter tabledata was null or empty.";
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(tableData),
+                "Request parameter 'tabledata' is null or empty.");
 
         resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        resp.setHeader("Content-disposition", "attachment; filename=" + id + ".xlsx");
+        resp.setHeader("Content-disposition", "attachment; filename=" + title + ".xlsx");
 
-        JsonObject jsonTable = new JsonParser().parse(tableData)
+        String sessionId = req.getSession(true)
+            .getId();
+
+        XSSFWorkbook workbook = parseWorkbook(tableData, sessionId, title);
+
+        ServletOutputStream outputStream = resp.getOutputStream();
+        workbook.write(outputStream);
+        outputStream.flush();
+    }
+
+    private XSSFWorkbook parseWorkbook(String tableData, String sessionId, String title) throws IOException
+    {
+        // TODO: Sheet title should be a property in the JSON sheet.
+        WorkbookBuilder builder = new WorkbookBuilder().createWorkbook()
+            .createSheet(title);
+
+        JsonObject sheet = new JsonParser().parse(tableData)
             .getAsJsonObject();
 
-        XSSFWorkbook workBook = new XSSFWorkbook();
-        XSSFSheet sheet = workBook.createSheet(id);
+        parseSheet(builder, sessionId, sheet);
 
-        parseSheet(workBook, sheet, jsonTable);
-
-        OutputStream out = resp.getOutputStream();
-        workBook.write(out);
-        out.flush();
+        return builder.build();
     }
 
-    public static void parseSheet(XSSFWorkbook workBook, XSSFSheet sheet, JsonObject jsonTable)
+    private void parseSheet(WorkbookBuilder builder, String sessionId, JsonObject sheet)
     {
-        JsonArray rows = jsonTable.getAsJsonArray("rows");
+        JsonArray rows = sheet.getAsJsonArray("rows");
 
+        parseRows(builder, sessionId, rows);
+    }
+
+    private void parseRows(WorkbookBuilder builder, String sessionId, JsonArray rows)
+    {
         for (int rowIDX = 0; rowIDX < rows.size(); ++rowIDX)
         {
-            JsonObject jsonRow = rows.get(rowIDX)
+            JsonObject row = rows.get(rowIDX)
                 .getAsJsonObject();
-            System.out.println("TableToExcel found new row: " + jsonRow);
 
-            parseRow(workBook, sheet, sheet.createRow(rowIDX), jsonRow);
+            builder.createRow(rowIDX);
+
+            parseRow(builder, sessionId, row);
         }
     }
 
-    private static void parseRow(XSSFWorkbook workBook, XSSFSheet sheet, XSSFRow row, JsonObject jsonRow)
+    private void parseRow(WorkbookBuilder builder, String sessionId, JsonObject row)
     {
-        // boolean isHeader = jsonRow.get("isHeaderRow")
-        // .getAsBoolean();
-
-        JsonArray cells = jsonRow.get("cells")
+        JsonArray cells = row.get("cells")
             .getAsJsonArray();
 
+        parseCells(builder, sessionId, cells);
+    }
+
+    private void parseCells(WorkbookBuilder builder, String sessionId, JsonArray cells)
+    {
         for (int i = 0; i < cells.size(); i++)
         {
-            JsonObject cellJsonObject = cells.get(i)
-                .getAsJsonObject();
+            builder.createCell(i);
 
-            parseCell(workBook, sheet, row.createCell(i), cellJsonObject);
+            parseCell(builder, sessionId, cells.get(i)
+                .getAsJsonObject());
         }
     }
 
-    private static void parseCell(XSSFWorkbook workBook, XSSFSheet sheet, XSSFCell cell, JsonObject jsonCell)
+    private void parseCell(WorkbookBuilder builder, String sessionId, JsonObject jsonCell)
     {
-        if (jsonCell.has("iconUrl"))
+        // TODO: Improve cell type determination (type info should be provided in json?)
+        if (!jsonCell.has("iconUrl"))
         {
+            String cellValue = jsonCell.get("text")
+                .getAsString();
+            builder.addTextToCell(cellValue);
+            System.out.println("TableToExcel found new cell: " + cellValue);
+        }
+        else
+        {
+            String url = jsonCell.get("iconUrl")
+                .getAsString();
+            Preconditions.checkArgument(!Strings.isNullOrEmpty(url), "url is null or empty.");
+
             try
             {
-                URL iconUrl = new URL(jsonCell.get("iconUrl")
-                    .getAsString());
+                URLConnection connection = new URL(url).openConnection();
+                connection.setRequestProperty("Cookie", "JSESSIONID=" + sessionId);
+                connection.connect();
 
-                String path = iconUrl.getPath();
+                String mimeType = getMimeType(connection);
 
-                if (path.contains("."))
+                if (isImageTypeSupported(mimeType))
                 {
-                    String extension = path.substring(path.lastIndexOf("."));
+                    InputStream inputStream = connection.getInputStream();
+                    byte[] imageInByte = readAllBytes(inputStream);
+                    Integer imageFormat = mimeTypeToPoiImageFormat.get(mimeType);
+                    int imageType = Preconditions.checkNotNull(imageFormat);
 
-                    if (!".png".equalsIgnoreCase(extension))
-                    {
-                        System.out.println("TableToExcel - extension '" + extension + "' is currently not supported...");
-                        cell.setCellValue("Only png images supported");
-                    }
-                    else
-                    {
-                        byte[] bytes = loadImageFromURL(iconUrl);
-
-                        int pictureIdx = workBook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
-
-                        ClientAnchor anchor = workBook.getCreationHelper()
-                            .createClientAnchor();
-                        anchor.setCol1(cell.getColumnIndex());
-                        anchor.setRow1(cell.getRowIndex());
-
-                        Picture pict = sheet.createDrawingPatriarch()
-                            .createPicture(anchor, pictureIdx);
-                        pict.resize();
-                    }
+                    // if(mimeType.equalsIgnoreCase("image/png")
+                    // {
+                    // //Do it the ImageIO way for png
+                    // byte[] bytes = loadImageFromURL(iconUrl);
+                    // }
+                    builder.drawPictureToCell(imageInByte, imageType);
+                }
+                else
+                {
+                    System.out.println("Table-To-Excel: " + mimeType + " is not supported.");
                 }
             }
             catch (MalformedURLException e)
@@ -137,20 +175,43 @@ public class TableToExcelServlet extends HttpServlet
                 e.printStackTrace();
             }
         }
-        else
-        {
-            String cellValue = jsonCell.get("text")
-                .getAsString();
-            cell.setCellValue(cellValue);
-            System.out.println("TableToExcel found new cell: " + cellValue);
-        }
     }
 
-    private static byte[] loadImageFromURL(URL iconUrl) throws IOException
+    private static String getMimeType(URLConnection connection)
     {
-        InputStream iconStream = iconUrl.openStream();
-        byte[] bytes = IOUtils.toByteArray(iconStream);
-        iconStream.close();
-        return bytes;
+        Preconditions.checkNotNull(connection, "connection");
+
+        String contentType = connection.getContentType();
+        if (Strings.isNullOrEmpty(contentType)) return null;
+
+        int indexOf = contentType.indexOf(";");
+
+        String mimeType = indexOf > -1
+                ? contentType.substring(0, indexOf)
+                : contentType;
+
+        return mimeType;
+    }
+
+    private static byte[] readAllBytes(InputStream inputStream) throws IOException
+    {
+        Preconditions.checkNotNull(inputStream, "inputStream");
+
+        // It was simply not possible to use ImageIO to load the image...
+        // reading it manually using byte streams worked at least for pngs and jpgs
+        BufferedInputStream in = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
+        BufferedOutputStream out = new BufferedOutputStream(baos);
+        int i;
+        while ((i = in.read()) != -1)
+        {
+            out.write(i);
+        }
+        out.flush();
+        out.close();
+        // baos.flush();
+        byte[] imageInByte = baos.toByteArray();
+        baos.close();
+        return imageInByte;
     }
 }

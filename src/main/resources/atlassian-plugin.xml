@@ -28,6 +28,9 @@
 		<interface>de.cranktheory.confluence.excel.MyPluginComponent
 		</interface>
 	</component>
+	<servlet-context-listener name="ImageIO service provider loader/unloader" key="helloWorld" class="com.twelvemonkeys.servlet.image.IIOProviderContextListener">
+        <description>ImageIO service provider loader/unloader</description>
+    </servlet-context-listener>
 	<servlet name="tableToExcel"
 		class="de.cranktheory.confluence.excel.TableToExcelServlet" key="tabletoexcel">
 		<url-pattern>/tabletoexcel</url-pattern>
