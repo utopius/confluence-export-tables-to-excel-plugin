@@ -1,6 +1,6 @@
 # Confluence Export table to Excel Plugin
 
-This plugin enables you to download tables on Confluence pages as Office Open XML / OOXML sheets.
+This plugin enables you to download tables on Confluence pages as Office Open XML / OOXML sheets.  
 
 The plugin consists of the following components:
 * A servlet which creates an Office Open XML (.xslx) Workbook from JSON
@@ -46,20 +46,19 @@ Enter:
 2. Execute atlas-mvn eclipse:eclipse which generates the Eclipse project
 3. Import project in Eclipse
 
-Or follow the instructions on https://developer.atlassian.com/display/DOCS/Set+Up+the+Eclipse+IDE+for+Windows
-Alternatively use IntelliJ: https://developer.atlassian.com/display/DOCS/Configure+IDEA+to+use+the+SDK
+Or follow the instructions on https://developer.atlassian.com/display/DOCS/Set+Up+the+Eclipse+IDE+for+Windows  
+Alternatively use IntelliJ: https://developer.atlassian.com/display/DOCS/Configure+IDEA+to+use+the+SDK  
 
 ## Other hints
-Shell commands:
-* atlas-clean   -- removes the target directory
-* atlas-compile -- compiles the plugin
-* atlas-package -- creates the jar file (compiles if necessary)
-* atlas-run     -- installs this plugin into the product and starts it on localhost
-* atlas-debug   -- same as atlas-run, but allows a debugger to attach at port 5005
-* atlas-cli     -- after atlas-run or atlas-debug, opens a Maven command line window:
-                   - 'pi' reinstalls the plugin into the running product instance
-* atlas-help    -- prints description for all commands in the SDK
+Shell commands:  
+* atlas-clean   -- removes the target directory  
+* atlas-compile -- compiles the plugin  
+* atlas-package -- creates the jar file (compiles if necessary)  
+* atlas-run     -- installs this plugin into the product and starts it on localhost  
+* atlas-debug   -- same as atlas-run, but allows a debugger to attach at port 5005  
+* atlas-cli     -- after atlas-run or atlas-debug, opens a Maven command line window:  
+                   - 'pi' reinstalls the plugin into the running product instance  
+* atlas-help    -- prints description for all commands in the SDK  
 
-Full documentation is always available at:
-
+Full documentation is always available at:  
 https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugin+SDK
