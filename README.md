@@ -1,5 +1,7 @@
 # Confluence Export table to Excel Plugin
 
+This plugin enables you to download tables on Confluence pages as Office Open XML / OOXML sheets.
+
 The plugin consists of the following components:
 * A servlet which creates an Office Open XML (.xslx) Workbook from JSON
 * A user-macro which to decorate tables with a button to initiate the export
