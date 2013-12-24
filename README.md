@@ -43,7 +43,11 @@ The plugin consists of the following components:
 3. Open a command prompt in the repository folder and execute:
 	* atlas-compile
 	* atlas-package
-	* atlas-debug
+
+To run the plugin in a developer instance run:
+
+* atlas-run
+* atlas-debug to run in debug mode (remote debugger available at port 5005)
 
 ## Setting up your IDE
 As the repository contains no project files you have to generate them using Maven. See the following guides on how to do that:
