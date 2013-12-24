@@ -19,14 +19,13 @@ The plugin consists of the following components:
 3. Use "Upload add-on" select the packaged jar file and confirm to upload and install the plugin.
 
 ## Adding the macro
-Open the Confluence administration and go to the user macros section and create a new user macro.
-Enter:
 
-* Macro Name: tabletoexcel
-* Macro Title: Table to Excel
-* Macro body processing: Rendered
-* Paste the contents of table-to-excel-user-macro.txt to the Template section (empty it before)
-* Save
+1. Open the Confluence administration and go to the user macros section and create a new user macro.
+	* Macro Name: tabletoexcel
+	* Macro Title: Table to Excel
+	* Macro body processing: Rendered
+2. Paste the contents of table-to-excel-user-macro.txt to the Template section (empty it before)
+3. Save
 
 ## Usage Example
 
@@ -42,9 +41,9 @@ Enter:
 1. Install the Atlassian Plugin SDK from https://marketplace.atlassian.com/download/plugins/atlassian-plugin-sdk-windows
 2. Clone the repository
 3. Open a command prompt in the repository folder and execute:
-  * atlas-compile
-  * atlas-package
-  * atlas-debug
+	* atlas-compile
+	* atlas-package
+	* atlas-debug
 
 ## Setting up your IDE
 As the repository contains no project files you have to generate them using Maven. See the following guides on how to do that:
