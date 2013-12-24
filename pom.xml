@@ -9,14 +9,18 @@
 	<version>1.0-SNAPSHOT</version>
 
 	<organization>
-		<name>Example Company</name>
+		<name>cranktheory.apps</name>
 		<url>http://www.example.com/</url>
 	</organization>
 
-	<name>table-to-excel</name>
-	<description>This is the de.cranktheory.confluence:table-to-excel plugin for Atlassian Confluence.</description>
+	<name>Export table to Excel</name>
+	<description>
+	    This plugin enables you to export tables in Confluence pages as Excel sheets. The tables must be decorated
+	    with the table-to-excel macro.
+	</description>
 	<packaging>atlassian-plugin</packaging>
 
+	<!-- local repo for the customized org.apache.xmlbeans -->
 	<repositories>
 		<repository>
 			<id>data-local</id>
@@ -45,29 +49,17 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.twelvemonkeys.imageio</groupId>
-			<artifactId>imageio-jpeg</artifactId>
-			<version>3.0-SNAPSHOT</version> <!-- Alternatively, build your own 3.0-something version -->
-		</dependency>
-		<dependency>
-			<groupId>com.twelvemonkeys.imageio</groupId>
-			<artifactId>imageio-tiff</artifactId>
-			<version>3.0-SNAPSHOT</version> <!-- Alternatively, build your own 3.0-something version -->
-		</dependency>
-		<dependency>
-			<groupId>com.twelvemonkeys</groupId>
-			<artifactId>twelvemonkeys-servlet</artifactId>
-			<version>3.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.10-beta2</version>
 		</dependency>
+
+		<!-- org.apache.xmlbeans has included some classes which have strange dependencies to org.w3c.dom.Node ...this
+			is a custom version -->
 		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>
-			<version>2.3.666</version>
+			<version>2.3-FIXED-DEPENDENCY</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
