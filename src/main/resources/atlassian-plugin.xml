@@ -9,8 +9,10 @@
 	</plugin-info>
 
 	<!-- add our i18n resource -->
-	<resource type="i18n" name="i18n" location="table-to-excel" />
-
+	<resource type="i18n" name="i18n"
+		location="de.cranktheory.confluence.excel.messages" />
+	<resource key="images" name="images/" type="download"
+		location="images" />
 	<!-- add our web resources -->
 	<web-resource key="table-to-excel-resources" name="table-to-excel Web Resources">
 		<dependency>com.atlassian.auiplugin:ajs</dependency>
@@ -22,16 +24,29 @@
 		<context>table-to-excel</context>
 	</web-resource>
 
-	<!-- publish our component -->
-	<component key="myPluginComponent"
-		class="de.cranktheory.confluence.excel.MyPluginComponentImpl" public="true">
-		<interface>de.cranktheory.confluence.excel.MyPluginComponent
-		</interface>
-	</component>
-	<servlet name="tableToExcel"
-		class="de.cranktheory.confluence.excel.TableToExcelServlet" key="tabletoexcel">
+	<servlet name="export-table-servlet"
+		class="de.cranktheory.confluence.excel.TableToExcelServlet" key="export-table-servlet">
 		<url-pattern>/tabletoexcel</url-pattern>
 	</servlet>
+	<xhtml-macro name="export-table"
+		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
+		class="de.cranktheory.confluence.excel.macro.ExportTableMacro" key="export-table-macro-xhtml">
+		<description>Decorates a table with the Export to Excel button.
+		</description>
+		<category name="reporting" />
+		<parameters>
+			<parameter name="sheetname" type="string" default="excel-export" />
+		</parameters>
+	</xhtml-macro>
+	<macro name="export-table"
+		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
+		class="de.cranktheory.confluence.excel.macro.ExportTableMacro" key="export-table-macro">
+		<description>Decorates a table with the Export to Excel button.
+		</description>
+		<category name="reporting" />
+		<parameters />
+	</macro>
+
 	<!-- import from the product container -->
 	<component-import key="applicationProperties"
 		interface="com.atlassian.sal.api.ApplicationProperties" />
