@@ -31,11 +31,11 @@ function exportTableToText (table, url) {
     return json;
 }
 
-function exportToEXCEL(button, title, url)
+function exportTable(parent, title, url)
 {
     var detected = false;
 
-    var table = jQuery(button.parentNode).find("table");
+    var table = jQuery(parent).find("table");
 
     var data = exportTableToText(table, url);
 

@@ -6,7 +6,7 @@ $body
 <div>
     $body
     <button class="aui-button aui-button-subtle aui-button-compact noprint"
-            onClick="exportToEXCEL(this, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
+            onClick="exportTable(this.parentNode, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span> Download spreadsheet</button>
 </div>
 
