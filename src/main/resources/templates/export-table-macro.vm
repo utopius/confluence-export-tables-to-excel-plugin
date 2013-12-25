@@ -10,7 +10,7 @@ $body
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span> Download spreadsheet</button>
     #end
     $body
-    <button class="aui-button aui-button-subtle aui-button-compact noprint"
+    <button class="aui-button aui-button-subtle aui-button-compact noprint" style="margin: 10px 0px;"
             onClick="exportTable(this.parentNode, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span> Download spreadsheet</button>
 </div>
