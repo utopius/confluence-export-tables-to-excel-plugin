@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.cranktheory.confluence</groupId>
+	<groupId>de.cranktheory.plugins.confluence</groupId>
 	<artifactId>export-table</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
@@ -13,10 +13,9 @@
 		<url>http://www.example.com/</url>
 	</organization>
 
-	<name>Export table to Excel</name>
+	<name>Download table as spreadsheet</name>
 	<description>
-	    This plugin enables you to export tables in Confluence pages as Excel sheets. The tables must be decorated
-	    with the table-to-excel macro.
+	    Exports tables on Confluence pages as spreadsheets in OOXML / Open Office XML format which are enclosed by the export-table macro included in this plugin.
 	</description>
 	<packaging>atlassian-plugin</packaging>
 
@@ -54,8 +53,8 @@
 			<version>3.10-beta2</version>
 		</dependency>
 
-		<!-- org.apache.xmlbeans has included some classes which have strange dependencies to org.w3c.dom.Node ...this
-			is a custom version -->
+		<!-- org.apache.xmlbeans has included some classes which have strange dependencies
+			to org.w3c.dom.Node ...this is a custom version -->
 		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>

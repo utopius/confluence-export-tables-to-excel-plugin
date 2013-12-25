@@ -1,4 +1,4 @@
-package de.cranktheory.confluence.excel;
+package de.cranktheory.plugins.confluence.excel;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

@@ -1,4 +1,4 @@
-#requireResource("de.cranktheory.confluence.export-table:table-to-excel-resources")
+#requireResource("de.cranktheory.plugins.confluence.export-table:export-table-resources")
 #if ($action.isPrintableVersion())
 $body
 #else
@@ -6,7 +6,7 @@ $body
 <div>
     $body
     <button class="aui-button aui-button-subtle aui-button-compact noprint"
-            onClick="exportToEXCEL(this, '$sheetname', '$req.getContextPath()/plugins/servlet/tabletoexcel')">
+            onClick="exportToEXCEL(this, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span> Download spreadsheet</button>
 </div>
 

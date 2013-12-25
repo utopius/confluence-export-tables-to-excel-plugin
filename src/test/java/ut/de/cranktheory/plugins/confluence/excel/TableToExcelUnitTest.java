@@ -1,9 +1,9 @@
-package ut.de.cranktheory.confluence.excel;
+package ut.de.cranktheory.plugins.confluence.excel;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import de.cranktheory.confluence.excel.TableToExcelServlet;
+import de.cranktheory.plugins.confluence.excel.TableToExcelServlet;
 
 public class TableToExcelUnitTest
 {

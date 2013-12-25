@@ -1,4 +1,4 @@
-package de.cranktheory.confluence.excel;
+package de.cranktheory.plugins.confluence.excel;
 
 import java.io.IOException;
 import java.io.OutputStream;
