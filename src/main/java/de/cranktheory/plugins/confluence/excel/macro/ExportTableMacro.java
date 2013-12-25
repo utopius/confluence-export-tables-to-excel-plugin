@@ -2,6 +2,7 @@ package de.cranktheory.plugins.confluence.excel.macro;
 
 import java.util.Map;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 
@@ -25,6 +26,7 @@ public class ExportTableMacro extends BaseMacro implements Macro
     {
         VelocityContext contextMap = new VelocityContext(MacroUtils.defaultVelocityContext());
         contextMap.put("body", body);
+        contextMap.put("buttonAbove", BooleanUtils.toBoolean(parameters.get("buttonAbove")));
         contextMap.put("sheetname", StringUtils.defaultString(parameters.get("sheetname"), "excel-export"));
         String renderedTemplate = VelocityUtils.getRenderedTemplate("/templates/export-table-macro.vm", contextMap);
         return renderedTemplate;

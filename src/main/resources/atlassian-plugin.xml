@@ -38,6 +38,7 @@
 		<category name="reporting" />
 		<parameters>
 			<parameter name="sheetname" type="string" default="excel-export" />
+			<parameter name="buttonAbove" type="boolean" default="false" />
 		</parameters>
 	</xhtml-macro>
 	<macro name="export-table"
