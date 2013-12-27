@@ -10,7 +10,7 @@
 
 	<!-- add our i18n resource -->
 	<resource type="i18n" name="messages"
-		location="de.cranktheory.plugins.confluence.excel" />
+		location="de.cranktheory.plugins.confluence.excel.messages" />
 	<resource key="images" name="images/" type="download"
 		location="images" />
 	<!-- add our web resources -->
@@ -24,6 +24,13 @@
 		<context>table-to-excel</context>
 	</web-resource>
 
+	<web-item key="export-all-the-tables" name="Export all tables" section="system.content.action/secondary"
+		weight="40">
+		<label key="de.cranktheory.plugins.confluence.excel.export.all.tables" />
+		<link>/plugins/servlet/export-table?pageId=$page.id</link>
+		<condition
+			class="com.atlassian.confluence.plugin.descriptor.web.conditions.NotPersonalSpaceCondition" />
+	</web-item>
 	<servlet name="export-table-servlet"
 		class="de.cranktheory.plugins.confluence.excel.TableToExcelServlet"
 		key="export-table-servlet">
