@@ -2,17 +2,19 @@ package de.cranktheory.plugins.confluence.excel;
 
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.poi.ss.usermodel.Workbook;
+
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
-import com.atlassian.confluence.xhtml.api.XhtmlVisitor;
 import com.google.common.base.Preconditions;
 
-public class PageVisitor implements XhtmlVisitor, VisitorParent
+public class PageVisitor implements VisitorParent, TableConverter
 {
-    private WorkbookBuilder _workbookBuilder;
-    private Page _page;
-    private PageManager _pageManager;
+    private final PageManager _pageManager;
+    private final Page _page;
+    private final WorkbookBuilder _workbookBuilder;
+
     private TableVisitor _tableVisitor;
     private int _sheetNumber = 0;
 
@@ -58,5 +60,11 @@ public class PageVisitor implements XhtmlVisitor, VisitorParent
         Preconditions.checkState(_tableVisitor == tableVisitor, "WTF?!?!1!");
 
         _tableVisitor = null;
+    }
+
+    @Override
+    public Workbook getWorkbook()
+    {
+        return _workbookBuilder.getWorkbook();
     }
 }

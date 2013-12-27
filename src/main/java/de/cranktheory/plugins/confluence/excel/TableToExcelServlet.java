@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,15 +20,14 @@ import com.atlassian.confluence.xhtml.api.XhtmlVisitor;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 public class TableToExcelServlet extends HttpServlet
 {
-    private static final Logger log = LoggerFactory.getLogger(TableToExcelServlet.class);
+    private static final long serialVersionUID = 4580469806768736781L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(TableToExcelServlet.class);
 
     private final PageManager _pageManager;
-
     private final XhtmlContent _xhtmlContent;
 
     public TableToExcelServlet(PageManager pageManager, XhtmlContent xhtmlContent)
@@ -41,70 +39,54 @@ public class TableToExcelServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        String pageId = req.getParameter("pageId");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(pageId), "pageId parameter is null or empty.");
+        String pageId = getParameter(req, "pageId");
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
-        try
-        {
-            String bodyAsString = page.getBodyAsString();
 
-            // final String body = _xhtmlContent.convertStorageToView(bodyAsString, new
-            // DefaultConversionContext(page.toPageContext()));
-            DefaultConversionContext context = new DefaultConversionContext(page.toPageContext());
-
-            WorkbookBuilder workbookBuilder = new XSSFWorkbookBuilder();
-            ArrayList<? extends XhtmlVisitor> visitors = Lists.newArrayList(new PageVisitor(_pageManager, page,
-                    workbookBuilder));
-            _xhtmlContent.handleXhtmlElements(bodyAsString, context, visitors);
-
-            resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            resp.setHeader("Content-disposition", "attachment; filename=foobar.xlsx");
-
-            workbookBuilder.getWorkbook()
-                .write(resp.getOutputStream());
-        }
-        // catch (XMLStreamException e)
-        // {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-        catch (XhtmlException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        System.out.println("TableToExcelServlet.doGet - pageId: " + pageId);
+        convertTable(resp, page, new PageVisitor(_pageManager, page, new XSSFWorkbookBuilder()));
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
     {
-        String title = req.getParameter("id");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(title), "Request parameter 'id' is null or empty.");
+        String pageId = getParameter(req, "pageId");
+        String sheetname = getParameter(req, "sheetname");
 
-        String tableData = req.getParameter("tabledata");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(tableData),
-                "Request parameter 'tabledata' is null or empty.");
+        Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        resp.setHeader("Content-disposition", "attachment; filename=" + title + ".xlsx");
+        convertTable(resp, page, new TableMacroVisitor(_pageManager, page, new XSSFWorkbookBuilder(), sheetname));
+    }
 
-        String sessionId = req.getSession(true)
-            .getId();
+    private static String getParameter(HttpServletRequest req, String name)
+    {
+        String value = req.getParameter(name);
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(value), "Request parameter '" + name + "' is null or empty.");
 
-        JsonObject jsonSheet = new JsonParser().parse(tableData)
-            .getAsJsonObject();
+        return value;
+    }
 
-        ServletOutputStream outputStream = resp.getOutputStream();
+    private void convertTable(HttpServletResponse resp, Page page, TableConverter visitor) throws IOException
+    {
+        String bodyAsString = page.getBodyAsString();
 
-        // TODO: Sheet title should be a property in the JSON sheet.
-        SheetParser.newInstance(new XSSFWorkbookBuilder(), new CellParser(new ImageLoader(sessionId)))
-            .parseSheet(title, jsonSheet)
-            .getWorkbook()
-            .write(outputStream);
+        DefaultConversionContext context = new DefaultConversionContext(page.toPageContext());
+        try
+        {
+            ArrayList<? extends XhtmlVisitor> visitors = Lists.newArrayList(visitor);
+            _xhtmlContent.handleXhtmlElements(bodyAsString, context, visitors);
 
-        outputStream.flush();
+            resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            String filename = "Excel-Export-" + page.getTitle() + ".xlsx";
+
+            resp.setHeader("Content-disposition", "attachment; filename=" + filename.replace(" ", "_"));
+            visitor.getWorkbook()
+                .write(resp.getOutputStream());
+        }
+        catch (XhtmlException e)
+        {
+            LOG.error("Error converting table.", e);
+            throw new IOException(e);
+        }
     }
 }

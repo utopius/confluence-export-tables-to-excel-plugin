@@ -6,14 +6,14 @@ $body
 <div>
     #if( $buttonAbove )
         <button class="aui-button aui-button-subtle aui-button-compact noprint"
-            onClick="exportTable(this.parentNode, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
+            onClick="exportTable(this.parentNode, '$pageId', '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span>
              $i18n.getText("de.cranktheory.plugins.confluence.excel.export.table")
         </button>
     #end
     $body
     <button class="aui-button aui-button-subtle aui-button-compact noprint" style="margin: 10px 0px;"
-            onClick="exportTable(this.parentNode, '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
+            onClick="exportTable(this.parentNode, '$pageId', '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
             <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span>
              $i18n.getText("de.cranktheory.plugins.confluence.excel.export.table")
     </button>

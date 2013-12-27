@@ -1,7 +1,5 @@
 package de.cranktheory.plugins.confluence.excel;
 
-import java.io.IOException;
-
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -32,7 +30,7 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
     }
 
     @Override
-    public Workbook getWorkbook() throws IOException
+    public Workbook getWorkbook()
     {
         return _workBook;
     }
