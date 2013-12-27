@@ -19,4 +19,6 @@ public interface WorkbookBuilder
 
     public abstract Workbook getWorkbook() throws IOException;
 
+    String getCurrentSheetname();
+
 }

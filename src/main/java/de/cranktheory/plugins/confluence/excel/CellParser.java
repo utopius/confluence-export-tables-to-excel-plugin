@@ -14,22 +14,6 @@ import com.google.gson.JsonObject;
 
 public class CellParser
 {
-    private static final ImmutableMap<String, Integer> mimeTypeToPoiImageFormat;
-
-    static
-    {
-        Builder<String, Integer> builder = ImmutableMap.builder();
-        mimeTypeToPoiImageFormat = builder.put("image/jpg", Workbook.PICTURE_TYPE_JPEG)
-            .put("image/jpeg", Workbook.PICTURE_TYPE_JPEG)
-            .put("image/png", Workbook.PICTURE_TYPE_PNG)
-            .build();
-    }
-
-    private static boolean isImageTypeSupported(String mimeType)
-    {
-        return mimeTypeToPoiImageFormat.containsKey(mimeType);
-    }
-
     private ImageLoader _imageLoader;
 
     public CellParser(ImageLoader imageLoader)
@@ -56,13 +40,13 @@ public class CellParser
         Image image = _imageLoader.load(new URL(url));
 
         String mimeType = image.getMimeType();
-        if (!isImageTypeSupported(mimeType))
+        if (!ImageUtils.isImageTypeSupported(mimeType))
         {
             System.out.println("Table-To-Excel: " + mimeType + " is not supported.");
             return;
         }
 
-        Integer imageFormat = mimeTypeToPoiImageFormat.get(mimeType);
+        Integer imageFormat = ImageUtils.mimeTypeToPoiFormat(mimeType);
         int imageType = Preconditions.checkNotNull(imageFormat);
 
         // if(mimeType.equalsIgnoreCase("image/png")

@@ -37,6 +37,14 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
     }
 
     @Override
+    public String getCurrentSheetname()
+    {
+        Preconditions.checkState(_currentSheet != null, "You have to call createSheet first.");
+
+        return _currentSheet.getSheetName();
+    }
+
+    @Override
     public void createRow(int index)
     {
         Preconditions.checkState(_currentSheet != null, "You have to call createSheet first.");
