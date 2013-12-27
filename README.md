@@ -9,7 +9,6 @@ The plugin consists of the following components:
 
 ## Restrictions
 
-* Nested tables are not supported. They are simply ommitted in the output.
 * Other image types than PNG and JPEG images are not yet supported.
 * Multiple images in one cell are not supported, yet. The first image wins.
 
