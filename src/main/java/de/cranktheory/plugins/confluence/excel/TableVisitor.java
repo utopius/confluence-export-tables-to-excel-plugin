@@ -14,14 +14,17 @@ import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.xhtml.api.XhtmlVisitor;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class TableVisitor implements XhtmlVisitor, VisitorParent
 {
     private final PageManager _pageManager;
     private final Page _page;
-    private final WorkbookBuilder _workbookBuilder;
+    private final WorksheetBuilder _sheetBuilder;
 
     private final VisitorParent _parent;
+
+    private final StringBuilder _characters = new StringBuilder();
 
     private TableVisitor _nestedVisitor;
 
@@ -35,10 +38,10 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
     private String _sheetName;
     private int _innerTableCount;
 
-    protected TableVisitor(PageManager pageManager, Page page, WorkbookBuilder workbookBuilder, VisitorParent parent,
+    protected TableVisitor(PageManager pageManager, Page page, WorksheetBuilder sheetBuilder, VisitorParent parent,
             String sheetName)
     {
-        _workbookBuilder = workbookBuilder;
+        _sheetBuilder = sheetBuilder;
         _page = page;
         _pageManager = pageManager;
         _parent = parent;
@@ -75,7 +78,7 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
         {
             String data = xmlEvent.asCharacters()
                 .getData();
-            _workbookBuilder.addTextToCell(data);
+            _characters.append(data);
         }
         return true;
     }
@@ -96,14 +99,14 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
         {
             ++_currentRowIndex;
 
-            _workbookBuilder.createRow(_currentRowIndex);
+            _sheetBuilder.createRow(_currentRowIndex);
         }
         else if ("td".equalsIgnoreCase(localPart) || "th".equalsIgnoreCase(localPart))
         {
             _insideCell = true;
             ++_currentColumnIndex;
 
-            _workbookBuilder.createCell(_currentColumnIndex);
+            _sheetBuilder.createCell(_currentColumnIndex);
         }
         else if ("image".equalsIgnoreCase(localPart) && _insideCell)
         {
@@ -148,9 +151,11 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
 
     private TableVisitor createNestedVisitor()
     {
-        String sheetName = "Table " + _innerTableCount;
-        createSheet(sheetName);
-        return new TableVisitor(_pageManager, _page, _workbookBuilder, this, sheetName);
+        WorksheetBuilder worksheetBuilder = createSheet("Table " + _innerTableCount);
+
+        _sheetBuilder.setHyperlinkToSheet(worksheetBuilder.getCurrentSheetname());
+
+        return new TableVisitor(_pageManager, _page, worksheetBuilder, this, worksheetBuilder.getCurrentSheetname());
     }
 
     private void endElement(XMLEvent xmlEvent)
@@ -172,6 +177,13 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
         else if ("td".equals(localPart) || "th".equalsIgnoreCase(localPart))
         {
             _insideCell = false;
+            String cellValue = _characters.toString();
+
+            if (!Strings.isNullOrEmpty(cellValue))
+            {
+                _sheetBuilder.setCellText(cellValue);
+            }
+            _characters.setLength(0);
         }
         else if ("image".equalsIgnoreCase(localPart) && _insideCell)
         {
@@ -191,7 +203,7 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
         {
             InputStream contentsAsStream = latestVersion.getContentsAsStream();
             String contentType = latestVersion.getContentType();
-            _workbookBuilder.drawPictureToCell(StreamUtils.readAllBytes(contentsAsStream),
+            _sheetBuilder.drawPictureToCell(StreamUtils.readAllBytes(contentsAsStream),
                     ImageUtils.mimeTypeToPoiFormat(contentType));
         }
         catch (PictureDrawingException e)
@@ -207,9 +219,10 @@ public class TableVisitor implements XhtmlVisitor, VisitorParent
     }
 
     @Override
-    public void createSheet(String sheetName)
+    public WorksheetBuilder createSheet(String sheetName)
     {
-        //FIXME: ARGH...after the nested visitor created a new sheet, we will write in the new sheet, too, once we get control back!
-        _parent.createSheet(_sheetName + " " + sheetName);
+        // FIXME: ARGH...after the nested visitor created a new sheet, we will write in the new sheet, too, once we get
+        // control back!
+        return _parent.createSheet(_sheetName + " " + sheetName);
     }
 }

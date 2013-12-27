@@ -38,17 +38,17 @@ public class PageVisitor implements XhtmlVisitor, VisitorParent
         {
             ++_sheetNumber;
             String sheetName = "Table " + _sheetNumber;
-            createSheet(sheetName);
-            _tableVisitor = new TableVisitor(_pageManager, _page, _workbookBuilder, this, sheetName);
+            WorksheetBuilder sheetBuilder = createSheet(sheetName);
+            _tableVisitor = new TableVisitor(_pageManager, _page, sheetBuilder, this, sheetName);
         }
 
         return true;
     }
 
     @Override
-    public void createSheet(String sheetName)
+    public WorksheetBuilder createSheet(String sheetName)
     {
-        _workbookBuilder.createSheet(sheetName);
+        return _workbookBuilder.createSheet(sheetName);
     }
 
     @Override

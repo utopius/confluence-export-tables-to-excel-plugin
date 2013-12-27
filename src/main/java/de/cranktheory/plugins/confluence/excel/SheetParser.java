@@ -15,6 +15,7 @@ public class SheetParser
 
     private CellParser _cellParser;
     private WorkbookBuilder _builder;
+    private WorksheetBuilder _sheetBuilder;
 
     private SheetParser(WorkbookBuilder builder, CellParser cellParser)
     {
@@ -24,7 +25,7 @@ public class SheetParser
 
     public WorkbookBuilder parseSheet(String title, JsonObject sheet)
     {
-        _builder.createSheet(title);
+        _sheetBuilder = _builder.createSheet(title);
         JsonArray rows = sheet.getAsJsonArray("rows");
 
         for (int i = 0; i < rows.size(); ++i)
@@ -32,7 +33,7 @@ public class SheetParser
             JsonObject row = rows.get(i)
                 .getAsJsonObject();
 
-            _builder.createRow(i);
+            _sheetBuilder.createRow(i);
 
             parseRow(row);
         }
@@ -47,11 +48,11 @@ public class SheetParser
 
         for (int i = 0; i < cells.size(); i++)
         {
-            _builder.createCell(i);
+            _sheetBuilder.createCell(i);
 
             try
             {
-                _cellParser.parseCell(_builder, cells.get(i)
+                _cellParser.parseCell(_sheetBuilder, cells.get(i)
                     .getAsJsonObject());
             }
             catch (MalformedURLException e)

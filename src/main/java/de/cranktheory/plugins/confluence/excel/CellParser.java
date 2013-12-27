@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.poi.ss.usermodel.Workbook;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.JsonObject;
 
 public class CellParser
@@ -21,7 +17,7 @@ public class CellParser
         _imageLoader = imageLoader;
     }
 
-    public void parseCell(WorkbookBuilder builder, JsonObject jsonCell)
+    public void parseCell(WorksheetBuilder builder, JsonObject jsonCell)
             throws MalformedURLException, IOException, PictureDrawingException
     {
         // TODO: Improve cell type determination (type info should be provided in json?)
@@ -29,7 +25,7 @@ public class CellParser
         {
             String cellValue = jsonCell.get("text")
                 .getAsString();
-            builder.addTextToCell(cellValue);
+            builder.setCellText(cellValue);
             System.out.println("TableToExcel found new cell: " + cellValue);
             return;
         }

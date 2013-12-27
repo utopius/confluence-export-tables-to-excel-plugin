@@ -5,6 +5,6 @@ public interface VisitorParent
 
     public void giveBackControl(TableVisitor tableVisitor);
 
-    public abstract void createSheet(String sheetName);
+    public abstract WorksheetBuilder createSheet(String sheetName);
 
 }

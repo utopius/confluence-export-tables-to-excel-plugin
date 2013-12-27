@@ -53,7 +53,7 @@ public class TableToExcelServlet extends HttpServlet
             // DefaultConversionContext(page.toPageContext()));
             DefaultConversionContext context = new DefaultConversionContext(page.toPageContext());
 
-            XSSFWorkbookBuilder workbookBuilder = new XSSFWorkbookBuilder();
+            WorkbookBuilder workbookBuilder = new XSSFWorkbookBuilder();
             ArrayList<? extends XhtmlVisitor> visitors = Lists.newArrayList(new PageVisitor(_pageManager, page,
                     workbookBuilder));
             _xhtmlContent.handleXhtmlElements(bodyAsString, context, visitors);
