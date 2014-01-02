@@ -42,6 +42,12 @@ public class ExportTableMacro extends BaseMacro implements Macro
     }
 
     @Override
+    public boolean suppressMacroRenderingDuringWysiwyg()
+    {
+        return true;
+    }
+
+    @Override
     public OutputType getOutputType()
     {
         return OutputType.BLOCK;

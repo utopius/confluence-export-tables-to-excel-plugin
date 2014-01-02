@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel;
+package de.cranktheory.plugins.confluence.excel.export;
 
 import org.apache.poi.ss.usermodel.Workbook;
 

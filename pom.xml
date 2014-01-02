@@ -9,13 +9,13 @@
 	<version>1.0-SNAPSHOT</version>
 
 	<organization>
-		<name>cranktheory.apps</name>
+		<name>Florian Herbel, Holger Steffan</name>
 		<url>http://www.example.com/</url>
 	</organization>
 
-	<name>Download table as spreadsheet</name>
+	<name>Export tables to Excel</name>
 	<description>
-	    Exports tables on Confluence pages as spreadsheets in OOXML / Open Office XML format which are enclosed by the export-table macro included in this plugin.
+	    Exports tables from Confluence pages as Excel spreadsheets in OOXML / Open Office XML (.xlsx) format.
 	</description>
 	<packaging>atlassian-plugin</packaging>
 

@@ -1,25 +1,31 @@
 package de.cranktheory.plugins.confluence.excel;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.StringReader;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
 
+import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.atlassian.confluence.content.render.xhtml.DefaultConversionContext;
-import com.atlassian.confluence.content.render.xhtml.XhtmlException;
+import com.atlassian.confluence.content.render.xhtml.XhtmlConstants;
+import com.atlassian.confluence.content.render.xhtml.XmlEventReaderFactory;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
-import com.atlassian.confluence.xhtml.api.XhtmlContent;
-import com.atlassian.confluence.xhtml.api.XhtmlVisitor;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+
+import de.cranktheory.plugins.confluence.excel.export.ExportAllTheTables;
+import de.cranktheory.plugins.confluence.excel.export.ExportNamedMacro;
+import de.cranktheory.plugins.confluence.excel.export.ImageParser;
+import de.cranktheory.plugins.confluence.excel.export.TableParser;
+import de.cranktheory.plugins.confluence.excel.export.WorkbookExporter;
+import de.cranktheory.plugins.confluence.excel.export.xssf.XSSFWorkbookBuilder;
 
 public class TableToExcelServlet extends HttpServlet
 {
@@ -28,33 +34,35 @@ public class TableToExcelServlet extends HttpServlet
     private static final Logger LOG = LoggerFactory.getLogger(TableToExcelServlet.class);
 
     private final PageManager _pageManager;
-    private final XhtmlContent _xhtmlContent;
+    private final XmlEventReaderFactory _xmlEventReaderFactory;
 
-    public TableToExcelServlet(PageManager pageManager, XhtmlContent xhtmlContent)
+    public TableToExcelServlet(PageManager pageManager, XmlEventReaderFactory xmlEventReaderFactory)
     {
         _pageManager = pageManager;
-        _xhtmlContent = xhtmlContent;
+        _xmlEventReaderFactory = xmlEventReaderFactory;
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException
     {
         String pageId = getParameter(req, "pageId");
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new PageVisitor(_pageManager, page, new XSSFWorkbookBuilder()));
+        convertTable(resp, page, new ExportAllTheTables(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(
+                page, _pageManager))));
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException
     {
         String pageId = getParameter(req, "pageId");
         String sheetname = getParameter(req, "sheetname");
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new TableMacroVisitor(_pageManager, page, new XSSFWorkbookBuilder(), sheetname));
+        convertTable(resp, page, new ExportNamedMacro(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(page,
+                _pageManager)), sheetname));
     }
 
     private static String getParameter(HttpServletRequest req, String name)
@@ -65,28 +73,29 @@ public class TableToExcelServlet extends HttpServlet
         return value;
     }
 
-    private void convertTable(HttpServletResponse resp, Page page, TableConverter visitor) throws IOException
+    private void convertTable(HttpServletResponse resp, Page page, WorkbookExporter tableExporter)
     {
-        String bodyAsString = page.getBodyAsString();
-
-        DefaultConversionContext context = new DefaultConversionContext(page.toPageContext());
         try
         {
-            ArrayList<? extends XhtmlVisitor> visitors = Lists.newArrayList(visitor);
-            _xhtmlContent.handleXhtmlElements(bodyAsString, context, visitors);
-
+            Workbook workbook = tableExporter.export(_xmlEventReaderFactory.createXMLEventReader(new StringReader(
+                    page.getBodyAsString()), XhtmlConstants.STORAGE_NAMESPACES, false));
             resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-            String filename = "Excel-Export-" + page.getTitle() + ".xlsx";
+            String safePageTitle = page.getTitle()
+                .replace(" ", "_");
 
-            resp.setHeader("Content-disposition", "attachment; filename=" + filename.replace(" ", "_"));
-            visitor.getWorkbook()
-                .write(resp.getOutputStream());
+            resp.setHeader("Content-disposition", String.format("attachment; filename=Excel-Export-%s.xlsx",
+                    safePageTitle));
+
+            workbook.write(resp.getOutputStream());
         }
-        catch (XhtmlException e)
+        catch (XMLStreamException e)
         {
-            LOG.error("Error converting table.", e);
-            throw new IOException(e);
+            LOG.error("Error while parsing Confluence Storage Format.", e);
+        }
+        catch (IOException e)
+        {
+            LOG.error("Error writing the response.", e);
         }
     }
 }
