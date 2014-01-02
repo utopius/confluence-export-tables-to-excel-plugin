@@ -11,6 +11,5 @@ public class TableToExcelUnitTest
     @Ignore
     public void testMyName()
     {
-        TableToExcelServlet component = new TableToExcelServlet();
     }
 }

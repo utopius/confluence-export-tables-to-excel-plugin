@@ -1,12 +1,13 @@
-package de.cranktheory.plugins.confluence.excel;
+package de.cranktheory.plugins.confluence.excel.export.xssf;
 
-import java.io.IOException;
-
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -14,26 +15,29 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.google.common.base.Preconditions;
 
-public class XSSFWorkbookBuilder implements WorkbookBuilder
+import de.cranktheory.plugins.confluence.excel.export.PictureDrawingException;
+import de.cranktheory.plugins.confluence.excel.export.WorksheetBuilder;
+
+public class XSSFWorksheetBuilder implements WorksheetBuilder
 {
-    private XSSFWorkbook _workBook;
-    private XSSFSheet _currentSheet;
-    private XSSFDrawing _currentSheetDrawing;
+    private final XSSFWorkbook _workBook;
+    private final XSSFSheet _currentSheet;
+    private final XSSFDrawing _currentSheetDrawing;
+
     private XSSFRow _currentRow;
     private XSSFCell _currentCell;
 
-    public XSSFWorkbookBuilder()
+    public XSSFWorksheetBuilder(XSSFWorkbook workBook, XSSFSheet currentSheet)
     {
-        _workBook = new XSSFWorkbook();
+        _workBook = workBook;
+        _currentSheet = currentSheet;
+        _currentSheetDrawing = _currentSheet.createDrawingPatriarch();
     }
 
     @Override
-    public void createSheet(String title)
+    public String getCurrentSheetname()
     {
-        Preconditions.checkState(_workBook != null, "You have to call createWorkbook first.");
-
-        _currentSheet = _workBook.createSheet(WorkbookUtil.createSafeSheetName(title));
-        _currentSheetDrawing = _currentSheet.createDrawingPatriarch();
+        return _currentSheet.getSheetName();
     }
 
     @Override
@@ -53,7 +57,7 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
     }
 
     @Override
-    public void addTextToCell(String cellValue)
+    public void setCellText(String cellValue)
     {
         Preconditions.checkState(_currentCell != null, "You have to call createCell first.");
 
@@ -95,8 +99,26 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
     }
 
     @Override
-    public Workbook getWorkbook() throws IOException
+    public void setHyperlinkToSheet(String sheetName)
     {
-        return _workBook;
+        XSSFCreationHelper creationHelper = _workBook.getCreationHelper();
+
+        Hyperlink link = creationHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+        link.setAddress("'" + sheetName + "'!A1");
+        _currentCell.setCellValue(sheetName);
+        _currentCell.setHyperlink(link);
+        _currentCell.setCellStyle(createHyperlinkStyle());
+    }
+
+    private CellStyle createHyperlinkStyle()
+    {
+        // cell style for hyperlinks
+        // by default hyperlinks are blue and underlined
+        CellStyle hlinkStyle = _workBook.createCellStyle();
+        Font hlinkFont = _workBook.createFont();
+        hlinkFont.setUnderline(Font.U_SINGLE);
+        hlinkFont.setColor(IndexedColors.BLUE.getIndex());
+        hlinkStyle.setFont(hlinkFont);
+        return hlinkStyle;
     }
 }

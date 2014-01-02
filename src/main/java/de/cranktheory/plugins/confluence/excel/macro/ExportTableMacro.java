@@ -28,6 +28,9 @@ public class ExportTableMacro extends BaseMacro implements Macro
         contextMap.put("body", body);
         contextMap.put("buttonAbove", BooleanUtils.toBoolean(parameters.get("buttonAbove")));
         contextMap.put("sheetname", StringUtils.defaultString(parameters.get("sheetname"), "excel-export"));
+
+        long id = context.getPageContext().getEntity().getId();
+        contextMap.put("pageId", id);
         String renderedTemplate = VelocityUtils.getRenderedTemplate("/templates/export-table-macro.vm", contextMap);
         return renderedTemplate;
     }
@@ -36,6 +39,12 @@ public class ExportTableMacro extends BaseMacro implements Macro
     public BodyType getBodyType()
     {
         return BodyType.RICH_TEXT;
+    }
+
+    @Override
+    public boolean suppressMacroRenderingDuringWysiwyg()
+    {
+        return true;
     }
 
     @Override

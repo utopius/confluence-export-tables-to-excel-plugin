@@ -10,7 +10,7 @@
 
 	<!-- add our i18n resource -->
 	<resource type="i18n" name="messages"
-		location="de.cranktheory.plugins.confluence.excel" />
+		location="de.cranktheory.plugins.confluence.excel.messages" />
 	<resource key="images" name="images/" type="download"
 		location="images" />
 	<!-- add our web resources -->
@@ -24,6 +24,13 @@
 		<context>table-to-excel</context>
 	</web-resource>
 
+	<web-item key="export-all-the-tables" name="Export all tables"
+		section="system.content.action/secondary" weight="40">
+		<label key="de.cranktheory.plugins.confluence.excel.export.all.tables" />
+		<link>/plugins/servlet/export-table?pageId=$page.id</link>
+		<condition
+			class="com.atlassian.confluence.plugin.descriptor.web.conditions.NotPersonalSpaceCondition" />
+	</web-item>
 	<servlet name="export-table-servlet"
 		class="de.cranktheory.plugins.confluence.excel.TableToExcelServlet"
 		key="export-table-servlet">
@@ -33,11 +40,9 @@
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
 		class="de.cranktheory.plugins.confluence.excel.macro.ExportTableMacro"
 		key="export-table-macro-xhtml">
-		<description>Decorates a table with the Export to Excel button.
-		</description>
 		<category name="reporting" />
 		<parameters>
-			<parameter name="sheetname" type="string" default="excel-export" />
+			<parameter name="sheetname" type="string" required="true"/>
 			<parameter name="buttonAbove" type="boolean" default="false" />
 		</parameters>
 	</xhtml-macro>
@@ -45,10 +50,11 @@
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
 		class="de.cranktheory.plugins.confluence.excel.macro.ExportTableMacro"
 		key="export-table-macro">
-		<description>Decorates a table with the Export to Excel button.
-		</description>
 		<category name="reporting" />
-		<parameters />
+		<parameters>
+			<parameter name="sheetname" type="string" required="true"/>
+			<parameter name="buttonAbove" type="boolean" default="false" />
+		</parameters>
 	</macro>
 
 	<!-- import from the product container -->
