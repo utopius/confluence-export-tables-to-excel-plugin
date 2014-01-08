@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel;
+package de.cranktheory.confluence.excel;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,23 +21,23 @@ import com.atlassian.confluence.pages.PageManager;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-import de.cranktheory.plugins.confluence.excel.export.ExportAllTheTables;
-import de.cranktheory.plugins.confluence.excel.export.ExportNamedMacro;
-import de.cranktheory.plugins.confluence.excel.export.ImageParser;
-import de.cranktheory.plugins.confluence.excel.export.TableParser;
-import de.cranktheory.plugins.confluence.excel.export.WorkbookExporter;
-import de.cranktheory.plugins.confluence.excel.export.xssf.XSSFWorkbookBuilder;
+import de.cranktheory.confluence.excel.export.ExportAllTheTables;
+import de.cranktheory.confluence.excel.export.ExportNamedMacro;
+import de.cranktheory.confluence.excel.export.ImageParser;
+import de.cranktheory.confluence.excel.export.TableParser;
+import de.cranktheory.confluence.excel.export.WorkbookExporter;
+import de.cranktheory.confluence.excel.export.xssf.XSSFWorkbookBuilder;
 
-public class TableToExcelServlet extends HttpServlet
+public class ExportServlet extends HttpServlet
 {
     private static final long serialVersionUID = 4580469806768736781L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(TableToExcelServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExportServlet.class);
 
     private final PageManager _pageManager;
     private final XmlEventReaderFactory _xmlEventReaderFactory;
 
-    public TableToExcelServlet(PageManager pageManager, XmlEventReaderFactory xmlEventReaderFactory)
+    public ExportServlet(PageManager pageManager, XmlEventReaderFactory xmlEventReaderFactory)
     {
         _pageManager = pageManager;
         _xmlEventReaderFactory = xmlEventReaderFactory;

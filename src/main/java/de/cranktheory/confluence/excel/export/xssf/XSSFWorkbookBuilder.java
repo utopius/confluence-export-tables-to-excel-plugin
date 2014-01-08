@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export.xssf;
+package de.cranktheory.confluence.excel.export.xssf;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -8,8 +8,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-import de.cranktheory.plugins.confluence.excel.export.WorkbookBuilder;
-import de.cranktheory.plugins.confluence.excel.export.WorksheetBuilder;
+import de.cranktheory.confluence.excel.export.WorkbookBuilder;
+import de.cranktheory.confluence.excel.export.WorksheetBuilder;
 
 public class XSSFWorkbookBuilder implements WorkbookBuilder
 {
