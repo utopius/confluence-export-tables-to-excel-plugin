@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
-import de.cranktheory.plugins.confluence.excel.macro.ExportTableMacro;
+import de.cranktheory.confluence.excel.macro.ExportTableMacro;
 
 /**
  * Exports tables from a page which are decorated with the {@link ExportTableMacro}.
@@ -97,7 +97,7 @@ public class ExportNamedMacro implements WorkbookExporter
             } while (!XMLEvents.isEnd(reader.nextEvent(), "parameter"));
         }
 
-        throw new IllegalStateException(String.valueOf("No Macro parameter elements found."));
+        throw new IllegalStateException(String.valueOf("No Macro parameter elements found. To export a specific table you must set the parameter 'sheetname'."));
     }
 
     private void parseMacro(XMLEventReader reader, String sheetname, TableParser tableParser) throws XMLStreamException

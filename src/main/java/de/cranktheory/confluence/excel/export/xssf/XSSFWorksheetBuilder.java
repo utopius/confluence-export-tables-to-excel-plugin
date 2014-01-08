@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export.xssf;
+package de.cranktheory.confluence.excel.export.xssf;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -15,8 +15,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.google.common.base.Preconditions;
 
-import de.cranktheory.plugins.confluence.excel.export.PictureDrawingException;
-import de.cranktheory.plugins.confluence.excel.export.WorksheetBuilder;
+import de.cranktheory.confluence.excel.export.PictureDrawingException;
+import de.cranktheory.confluence.excel.export.WorksheetBuilder;
 
 public class XSSFWorksheetBuilder implements WorksheetBuilder
 {

@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
