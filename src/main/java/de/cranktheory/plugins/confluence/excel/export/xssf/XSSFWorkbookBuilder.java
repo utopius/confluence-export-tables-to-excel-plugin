@@ -13,7 +13,7 @@ import de.cranktheory.plugins.confluence.excel.export.WorksheetBuilder;
 
 public class XSSFWorkbookBuilder implements WorkbookBuilder
 {
-    private XSSFWorkbook _workBook;
+    private final XSSFWorkbook _workBook;
 
     public XSSFWorkbookBuilder()
     {
@@ -23,13 +23,12 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
     @Override
     public WorksheetBuilder createSheet(String sheetName)
     {
-        Preconditions.checkState(_workBook != null, "You have to call createWorkbook first.");
         Preconditions.checkState(!Strings.isNullOrEmpty(sheetName), "sheetName is null or empty.");
 
         String safeSheetName = WorkbookUtil.createSafeSheetName(sheetName);
         XSSFSheet _currentSheet = _workBook.createSheet(safeSheetName);
 
-        return new XSSFWorksheetBuilder(_workBook, _currentSheet);
+        return XSSFWorksheetBuilder.newInstance(_workBook, _currentSheet);
     }
 
     @Override

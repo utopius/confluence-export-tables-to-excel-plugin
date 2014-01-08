@@ -10,6 +10,11 @@ public final class ImageUtils
 {
     private static final ImmutableMap<String, Integer> mimeTypeToPoiImageFormat;
 
+    private ImageUtils()
+    {
+        //Nope
+    }
+
     static
     {
         Builder<String, Integer> builder = ImmutableMap.builder();

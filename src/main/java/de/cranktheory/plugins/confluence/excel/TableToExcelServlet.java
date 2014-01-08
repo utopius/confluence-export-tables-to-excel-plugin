@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.poi.ss.usermodel.Workbook;
@@ -49,8 +50,8 @@ public class TableToExcelServlet extends HttpServlet
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new ExportAllTheTables(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(
-                page, _pageManager))));
+        convertTable(resp, page, ExportAllTheTables.newInstance(new XSSFWorkbookBuilder(),
+                TableParser.newInstance(ImageParser.newInstance(page, _pageManager))));
     }
 
     @Override
@@ -61,8 +62,8 @@ public class TableToExcelServlet extends HttpServlet
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new ExportNamedMacro(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(page,
-                _pageManager)), sheetname));
+        convertTable(resp, page, ExportNamedMacro.newInstance(new XSSFWorkbookBuilder(),
+                TableParser.newInstance(ImageParser.newInstance(page, _pageManager)), sheetname));
     }
 
     private static String getParameter(HttpServletRequest req, String name)
@@ -73,12 +74,17 @@ public class TableToExcelServlet extends HttpServlet
         return value;
     }
 
-    private void convertTable(HttpServletResponse resp, Page page, WorkbookExporter tableExporter)
+    private void convertTable(HttpServletResponse resp, Page page, WorkbookExporter exporter)
     {
+        Preconditions.checkNotNull(page, "page");
+
         try
         {
-            Workbook workbook = tableExporter.export(_xmlEventReaderFactory.createXMLEventReader(new StringReader(
-                    page.getBodyAsString()), XhtmlConstants.STORAGE_NAMESPACES, false));
+            StringReader reader = new StringReader(page.getBodyAsString());
+            XMLEventReader xmlEventReader = _xmlEventReaderFactory.createXMLEventReader(reader,
+                    XhtmlConstants.STORAGE_NAMESPACES, false);
+
+            Workbook workbook = exporter.export(xmlEventReader);
             resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
             String safePageTitle = page.getTitle()
@@ -91,7 +97,7 @@ public class TableToExcelServlet extends HttpServlet
         }
         catch (XMLStreamException e)
         {
-            LOG.error("Error while parsing Confluence Storage Format.", e);
+            LOG.error(String.format("Error while exporting tables of page '%s'.", page.getTitle()), e);
         }
         catch (IOException e)
         {

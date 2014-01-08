@@ -10,13 +10,22 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * Exports all tables on a Page.
+ */
 public class ExportAllTheTables implements WorkbookExporter
 {
+    public static ExportAllTheTables newInstance(WorkbookBuilder builder, TableParser tableParser)
+    {
+        return new ExportAllTheTables(Preconditions.checkNotNull(builder, "builder"), Preconditions.checkNotNull(
+                tableParser, "tableParser"));
+    }
+
     private final WorkbookBuilder _builder;
 
     private TableParser _tableParser;
 
-    public ExportAllTheTables(WorkbookBuilder builder, TableParser tableParser)
+    private ExportAllTheTables(WorkbookBuilder builder, TableParser tableParser)
     {
         _builder = builder;
         _tableParser = tableParser;
@@ -103,6 +112,7 @@ public class ExportAllTheTables implements WorkbookExporter
                 break;
             }
 
+            // TODO: Add support for nested export-table macros
             // final boolean foundNestedMacro = Util.isStart(event, "structured-macro");
             // if (foundNestedMacro)
             // {
@@ -118,8 +128,8 @@ public class ExportAllTheTables implements WorkbookExporter
 
     private boolean nextIsParameter(XMLEventReader reader) throws XMLStreamException
     {
-        XMLEvent peek = reader.peek();
-        boolean nextIsParameter = peek != null && XMLEvents.isStart(peek, "parameter");
+        XMLEvent next = reader.peek();
+        boolean nextIsParameter = next != null && XMLEvents.isStart(next, "parameter");
         return nextIsParameter;
     }
 

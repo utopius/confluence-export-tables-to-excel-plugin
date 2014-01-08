@@ -10,13 +10,25 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
+import de.cranktheory.plugins.confluence.excel.macro.ExportTableMacro;
+
+/**
+ * Exports tables from a page which are decorated with the {@link ExportTableMacro}.
+ */
 public class ExportNamedMacro implements WorkbookExporter
 {
+    public static ExportNamedMacro newInstance(WorkbookBuilder builder, TableParser tableParser,
+            String sheetnameToExport)
+    {
+        return new ExportNamedMacro(Preconditions.checkNotNull(builder, "builder"), Preconditions.checkNotNull(
+                tableParser, "tableParser"), Preconditions.checkNotNull(sheetnameToExport, "sheetnameToExport"));
+    }
+
     private final WorkbookBuilder _builder;
     private final TableParser _tableParser;
     private final String _sheetToExport;
 
-    public ExportNamedMacro(WorkbookBuilder builder, TableParser tableParser, String sheetnameToExport)
+    private ExportNamedMacro(WorkbookBuilder builder, TableParser tableParser, String sheetnameToExport)
     {
         _builder = builder;
         _tableParser = tableParser;
