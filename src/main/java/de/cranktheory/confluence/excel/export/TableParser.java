@@ -14,6 +14,7 @@ public class TableParser
     }
 
     private final ImageParser _imageParser;
+    private int _nestedTableCount = 0;
 
     private TableParser(ImageParser imageParser)
     {
@@ -23,14 +24,26 @@ public class TableParser
     public void parseTable(XMLEventReader reader, WorkbookBuilder workbookBuilder, String sheetname)
             throws XMLStreamException
     {
+        _nestedTableCount = 0;
+
+        internalParseTable(reader, workbookBuilder, sheetname);
+    }
+
+    private void internalParseTable(XMLEventReader reader, WorkbookBuilder workbookBuilder, String sheetname)
+            throws XMLStreamException
+    {
         WorksheetBuilder sheetBuilder = workbookBuilder.createSheet(sheetname);
 
         int rowIndex = 0;
+
         while (reader.hasNext())
         {
             XMLEvent event = reader.nextEvent();
 
-            if (XMLEvents.isEnd(event, "table")) return;
+            if (XMLEvents.isEnd(event, "table"))
+            {
+                return;
+            }
 
             if (XMLEvents.isStart(event, "tr"))
             {
@@ -73,8 +86,9 @@ public class TableParser
             if (XMLEvents.isStart(event, "table"))
             {
                 // WOHOO, a nested table
-                String newSheetName = sheetBuilder.getCurrentSheetname() + " blubb";
-                parseTable(reader, workbookBuilder, newSheetName);
+                ++_nestedTableCount;
+                String newSheetName = sheetBuilder.getCurrentSheetname() + " nested Table " + _nestedTableCount;
+                internalParseTable(reader, workbookBuilder, newSheetName);
                 sheetBuilder.setHyperlinkToSheet(newSheetName);
             }
             else if (event.isCharacters())

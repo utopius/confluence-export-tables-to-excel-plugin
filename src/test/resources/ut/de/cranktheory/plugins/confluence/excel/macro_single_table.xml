@@ -1,0 +1,16 @@
+<ac:structured-macro ac:name="export-table"><ac:parameter ac:name="sheetname">mySheet</ac:parameter>
+	<ac:rich-text-body>
+		<table>
+			<tbody>
+				<tr>
+					<th>header 1</th>
+					<th>header 2</th>
+				</tr>
+				<tr>
+					<td>cell 1</td>
+					<td>cell 2</td>
+				</tr>
+			</tbody>
+		</table>
+	</ac:rich-text-body>
+</ac:structured-macro>
