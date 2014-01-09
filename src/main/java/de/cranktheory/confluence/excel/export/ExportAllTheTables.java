@@ -42,7 +42,7 @@ public class ExportAllTheTables implements WorkbookExporter
         {
             XMLEvent event = reader.nextEvent();
 
-            if (isExportTableMacro(event))
+            if (XMLEvents.isStartMacro(event, "structured-macro"))
             {
                 String sheetname = parseSheetname(reader);
 
@@ -59,22 +59,9 @@ public class ExportAllTheTables implements WorkbookExporter
         return _builder.getWorkbook();
     }
 
-    private boolean isExportTableMacro(XMLEvent event)
-    {
-        if (XMLEvents.isStart(event, "structured-macro"))
-        {
-            Attribute macroNameAttribute = event.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/content}name"));
-
-            return "export-table".equals(macroNameAttribute.getValue());
-        }
-
-        return false;
-    }
-
     private String parseSheetname(XMLEventReader reader) throws XMLStreamException
     {
-        while (nextIsParameter(reader))
+        while (XMLEvents.nextIsParameter(reader))
         {
             do
             {
@@ -124,13 +111,6 @@ public class ExportAllTheTables implements WorkbookExporter
                 tableParser.parseTable(reader, _builder, sheetname);
             }
         }
-    }
-
-    private boolean nextIsParameter(XMLEventReader reader) throws XMLStreamException
-    {
-        XMLEvent next = reader.peek();
-        boolean nextIsParameter = next != null && XMLEvents.isStart(next, "parameter");
-        return nextIsParameter;
     }
 
 }

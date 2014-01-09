@@ -26,9 +26,9 @@ public class XSSFWorkbookBuilder implements WorkbookBuilder
         Preconditions.checkState(!Strings.isNullOrEmpty(sheetName), "sheetName is null or empty.");
 
         String safeSheetName = WorkbookUtil.createSafeSheetName(sheetName);
-        XSSFSheet _currentSheet = _workBook.createSheet(safeSheetName);
+        XSSFSheet workSheet = _workBook.createSheet(safeSheetName);
 
-        return XSSFWorksheetBuilder.newInstance(_workBook, _currentSheet);
+        return XSSFWorksheetBuilder.newInstance(_workBook, workSheet);
     }
 
     @Override
