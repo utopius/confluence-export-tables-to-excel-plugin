@@ -8,14 +8,14 @@ import com.google.common.base.Preconditions;
 
 public class TableParser
 {
-    public static TableParser newInstance(ImageParser imageParser)
+    public static TableParser newInstance(ImageParserr imageParser)
     {
         return new TableParser(Preconditions.checkNotNull(imageParser, "imageParser"));
     }
 
-    private final ImageParser _imageParser;
+    private final ImageParserr _imageParser;
 
-    private TableParser(ImageParser imageParser)
+    private TableParser(ImageParserr imageParser)
     {
         _imageParser = imageParser;
     }

@@ -17,11 +17,11 @@ import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
 import com.google.common.base.Preconditions;
 
-public class ImageParser
+public class ImageParser implements ImageParserr
 {
     private static final Logger LOG = LoggerFactory.getLogger(ImageParser.class);
 
-    public static ImageParser newInstance(Page page, PageManager pageManager)
+    public static ImageParserr newInstance(Page page, PageManager pageManager)
     {
         return new ImageParser(Preconditions.checkNotNull(page, "page"), Preconditions.checkNotNull(pageManager,
                 "pageManager"));
@@ -36,6 +36,7 @@ public class ImageParser
         _pageManager = pageManager;
     }
 
+    @Override
     public void parseImage(XMLEventReader reader, WorksheetBuilder sheetBuilder) throws XMLStreamException
     {
         XMLEvent event = reader.nextEvent();
