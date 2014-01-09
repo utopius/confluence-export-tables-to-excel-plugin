@@ -80,7 +80,8 @@ public class ExportServlet extends HttpServlet
 
         try
         {
-            StringReader reader = new StringReader(page.getBodyAsString());
+            String bodyAsString = page.getBodyAsString();
+            StringReader reader = new StringReader(bodyAsString);
             XMLEventReader xmlEventReader = _xmlEventReaderFactory.createXMLEventReader(reader,
                     XhtmlConstants.STORAGE_NAMESPACES, false);
 
