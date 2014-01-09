@@ -43,7 +43,7 @@ public class ExportNamedMacro implements WorkbookExporter
         {
             XMLEvent event = reader.nextEvent();
 
-            if (XMLEvents.isStartMacro(event, "export-table"))
+            if (XMLEvents.isStartExportMacro(event))
             {
                 String sheetname = parseSheetname(reader);
 

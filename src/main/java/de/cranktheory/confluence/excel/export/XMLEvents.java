@@ -7,7 +7,6 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 public final class XMLEvents
 {
@@ -36,17 +35,16 @@ public final class XMLEvents
             .getLocalPart());
     }
 
-    public static boolean isStartMacro(XMLEvent event, String name)
+    public static boolean isStartExportMacro(XMLEvent event)
     {
         Preconditions.checkNotNull(event, "event");
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "name is null or empty.");
 
-        if (isStart(event, name))
+        if (isStart(event, "structured-macro"))
         {
             Attribute macroNameAttribute = event.asStartElement()
                 .getAttributeByName(QName.valueOf("{http://atlassian.com/content}name"));
 
-            return name.equals(macroNameAttribute.getValue());
+            return "export-table".equals(macroNameAttribute.getValue());
         }
 
         return false;

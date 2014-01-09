@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
 import de.cranktheory.confluence.excel.export.ExportAllTheTables;
+import de.cranktheory.confluence.excel.export.WorkbookExporter;
 
 public class XmlTest
 {
@@ -39,7 +40,7 @@ public class XmlTest
         }
     }
 
-    protected Workbook export(ExportAllTheTables target, String filename)
+    protected Workbook export(WorkbookExporter target, String filename)
     {
         Preconditions.checkNotNull(target, "target");
         Preconditions.checkNotNull(filename, "filename");

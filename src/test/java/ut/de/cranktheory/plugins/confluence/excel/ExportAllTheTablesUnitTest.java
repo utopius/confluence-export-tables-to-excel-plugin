@@ -53,6 +53,29 @@ public class ExportAllTheTablesUnitTest extends XmlTest
         Hyperlink hyperlink = cell.getHyperlink();
 
         Assert.assertNotNull(hyperlink);
-        Assert.assertEquals("'Table 1 blubb'!A1", hyperlink.getAddress());
+        Assert.assertEquals("'Table 1 nested Table 1'!A1", hyperlink.getAddress());
+    }
+
+    @Test
+    public void Given_a_table_with_two_nested_tables_Then_export_them_as_three_sheets_And_link_the_nested_tables_to_the_respective_cells()
+    {
+        ExportAllTheTables target = ExportAllTheTables.newInstance(new XSSFWorkbookBuilder(),
+                TableParser.newInstance(new MockImageParser()));
+
+        Workbook export = export(target, "two_nested_tables.xml");
+
+        Assert.assertEquals(3, export.getNumberOfSheets());
+
+        Cell cell1 = export.getSheetAt(0).getRow(1).getCell(0);
+        Hyperlink hyperlink1 = cell1.getHyperlink();
+
+        Assert.assertNotNull(hyperlink1);
+        Assert.assertEquals("'Table 1 nested Table 1'!A1", hyperlink1.getAddress());
+
+        Cell cell2 = export.getSheetAt(0).getRow(1).getCell(1);
+        Hyperlink hyperlink2 = cell2.getHyperlink();
+
+        Assert.assertNotNull(hyperlink2);
+        Assert.assertEquals("'Table 1 nested Table 2'!A1", hyperlink2.getAddress());
     }
 }

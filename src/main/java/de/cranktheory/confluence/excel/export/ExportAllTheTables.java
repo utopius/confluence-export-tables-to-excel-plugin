@@ -42,7 +42,7 @@ public class ExportAllTheTables implements WorkbookExporter
         {
             XMLEvent event = reader.nextEvent();
 
-            if (XMLEvents.isStartMacro(event, "structured-macro"))
+            if (XMLEvents.isStartExportMacro(event))
             {
                 String sheetname = parseSheetname(reader);
 

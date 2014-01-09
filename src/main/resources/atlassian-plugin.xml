@@ -10,7 +10,7 @@
 
 	<!-- add our i18n resource -->
 	<resource type="i18n" name="messages"
-		location="de.cranktheory.confluence.excel.messages" />
+		location="${project.groupId}.excel.messages" />
 	<resource key="images" name="images/" type="download"
 		location="images" />
 	<!-- add our web resources -->
@@ -26,19 +26,19 @@
 
 	<web-item key="export-all-the-tables" name="Export all tables"
 		section="system.content.action/secondary" weight="40">
-		<label key="de.cranktheory.confluence.excel.export.all.tables" />
+		<label key="${project.groupId}.excel.export.all.tables" />
 		<link>/plugins/servlet/export-table?pageId=$page.id</link>
 		<condition
 			class="com.atlassian.confluence.plugin.descriptor.web.conditions.NotPersonalSpaceCondition" />
 	</web-item>
 	<servlet name="export-table-servlet"
-		class="de.cranktheory.confluence.excel.ExportServlet"
+		class="${project.groupId}.excel.ExportServlet"
 		key="export-table-servlet">
 		<url-pattern>/export-table</url-pattern>
 	</servlet>
 	<xhtml-macro name="export-table"
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
-		class="de.cranktheory.confluence.excel.ExportTableMacro"
+		class="${project.groupId}.excel.ExportTableMacro"
 		key="export-table-macro-xhtml">
 		<category name="reporting" />
 		<parameters>
@@ -48,7 +48,7 @@
 	</xhtml-macro>
 	<macro name="export-table"
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
-		class="de.cranktheory.confluence.excel.ExportTableMacro"
+		class="${project.groupId}.excel.ExportTableMacro"
 		key="export-table-macro">
 		<category name="reporting" />
 		<parameters>
