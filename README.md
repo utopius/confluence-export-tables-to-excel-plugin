@@ -72,7 +72,7 @@ https://developer.atlassian.com/display/DOCS/Introduction+to+the+Atlassian+Plugi
 
 ## License
 
-Copyright 2013 Florian Herbel, Holger Steffan
+    Copyright 2013 Florian Herbel, Holger Steffan
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
