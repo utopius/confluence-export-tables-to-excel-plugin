@@ -23,7 +23,7 @@ import com.google.common.base.Strings;
 
 import de.cranktheory.confluence.excel.export.ExportAllTheTables;
 import de.cranktheory.confluence.excel.export.ExportNamedMacro;
-import de.cranktheory.confluence.excel.export.ImageParser;
+import de.cranktheory.confluence.excel.export.ImageParserImpl;
 import de.cranktheory.confluence.excel.export.TableParser;
 import de.cranktheory.confluence.excel.export.WorkbookExporter;
 import de.cranktheory.confluence.excel.export.xssf.XSSFWorkbookBuilder;
@@ -51,7 +51,7 @@ public class ExportServlet extends HttpServlet
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
         convertTable(resp, page, ExportAllTheTables.newInstance(new XSSFWorkbookBuilder(),
-                TableParser.newInstance(ImageParser.newInstance(page, _pageManager))));
+                TableParser.newInstance(ImageParserImpl.newInstance(page, _pageManager))));
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ExportServlet extends HttpServlet
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
         convertTable(resp, page, ExportNamedMacro.newInstance(new XSSFWorkbookBuilder(),
-                TableParser.newInstance(ImageParser.newInstance(page, _pageManager)), sheetname));
+                TableParser.newInstance(ImageParserImpl.newInstance(page, _pageManager)), sheetname));
     }
 
     private static String getParameter(HttpServletRequest req, String name)
