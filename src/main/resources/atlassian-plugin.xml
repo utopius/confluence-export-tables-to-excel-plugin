@@ -38,7 +38,7 @@
 	</servlet>
 	<xhtml-macro name="export-table"
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
-		class="de.cranktheory.confluence.excel.macro.ExportTableMacro"
+		class="de.cranktheory.confluence.excel.ExportTableMacro"
 		key="export-table-macro-xhtml">
 		<category name="reporting" />
 		<parameters>
@@ -48,7 +48,7 @@
 	</xhtml-macro>
 	<macro name="export-table"
 		icon="/download/resources/${project.groupId}.${project.artifactId}/images/pluginLogo.png"
-		class="de.cranktheory.confluence.excel.macro.ExportTableMacro"
+		class="de.cranktheory.confluence.excel.ExportTableMacro"
 		key="export-table-macro">
 		<category name="reporting" />
 		<parameters>

@@ -10,8 +10,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
-import de.cranktheory.confluence.excel.macro.ExportTableMacro;
-
 /**
  * Exports tables from a page which are decorated with the {@link ExportTableMacro}.
  */

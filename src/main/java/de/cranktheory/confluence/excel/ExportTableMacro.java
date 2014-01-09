@@ -1,4 +1,4 @@
-package de.cranktheory.confluence.excel.macro;
+package de.cranktheory.confluence.excel;
 
 import java.util.Map;
 
