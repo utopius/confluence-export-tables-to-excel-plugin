@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export.xssf;
+package de.cranktheory.confluence.excel.export.xssf;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -15,45 +15,49 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.google.common.base.Preconditions;
 
-import de.cranktheory.plugins.confluence.excel.export.PictureDrawingException;
-import de.cranktheory.plugins.confluence.excel.export.WorksheetBuilder;
+import de.cranktheory.confluence.excel.export.PictureDrawingException;
+import de.cranktheory.confluence.excel.export.WorksheetBuilder;
 
 public class XSSFWorksheetBuilder implements WorksheetBuilder
 {
+    public static XSSFWorksheetBuilder newInstance(XSSFWorkbook workBook, XSSFSheet workSheet)
+    {
+        return new XSSFWorksheetBuilder(Preconditions.checkNotNull(workBook, "workBook"), Preconditions.checkNotNull(
+                workSheet, "workSheet"));
+    }
+
     private final XSSFWorkbook _workBook;
-    private final XSSFSheet _currentSheet;
-    private final XSSFDrawing _currentSheetDrawing;
+    private final XSSFSheet _workSheet;
+    private final XSSFDrawing _drawing;
 
     private XSSFRow _currentRow;
     private XSSFCell _currentCell;
 
-    public XSSFWorksheetBuilder(XSSFWorkbook workBook, XSSFSheet currentSheet)
+    private XSSFWorksheetBuilder(XSSFWorkbook workBook, XSSFSheet currentSheet)
     {
         _workBook = workBook;
-        _currentSheet = currentSheet;
-        _currentSheetDrawing = _currentSheet.createDrawingPatriarch();
+        _workSheet = currentSheet;
+        _drawing = _workSheet.createDrawingPatriarch();
     }
 
     @Override
     public String getCurrentSheetname()
     {
-        return _currentSheet.getSheetName();
+        return _workSheet.getSheetName();
     }
 
     @Override
     public void createRow(int index)
     {
-        Preconditions.checkState(_currentSheet != null, "You have to call createSheet first.");
-
-        _currentRow = _currentSheet.createRow(index);
+        _currentRow = _workSheet.createRow(index);
     }
 
     @Override
-    public void createCell(int i)
+    public void createCell(int index)
     {
         Preconditions.checkState(_currentRow != null, "You have to call createRow first.");
 
-        _currentCell = _currentRow.createCell(i);
+        _currentCell = _currentRow.createCell(index);
     }
 
     @Override
@@ -71,7 +75,7 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
 
         ClientAnchor anchor = createAnchor(_currentCell);
         int pictureIndex = _workBook.addPicture(imageInByte, imageType);
-        Picture pict = _currentSheetDrawing.createPicture(anchor, pictureIndex);
+        Picture pict = _drawing.createPicture(anchor, pictureIndex);
         try
         {
             pict.resize();
@@ -79,7 +83,7 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
         catch (Exception e)
         {
             // pict.resize() is ugly, throwing NPEs without contextual information about the real
-            // error (FUCK YOU, Apache). Therefore we catch ALL exceptions here.
+            // error (thanks@Apache). Therefore we catch ALL exceptions here.
             // TODO Add context info to exception like ImageIO registered readers, etc.
             throw new PictureDrawingException("Error during picture drawing - resize failed", e);
         }
@@ -89,6 +93,8 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
     {
         ClientAnchor anchor = _workBook.getCreationHelper()
             .createClientAnchor();
+
+        // TODO: Improve image anchoring
         int columnIndex = cell.getColumnIndex();
         int rowIndex = cell.getRowIndex();
         anchor.setCol1(columnIndex);
@@ -104,7 +110,7 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
         XSSFCreationHelper creationHelper = _workBook.getCreationHelper();
 
         Hyperlink link = creationHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
-        link.setAddress("'" + sheetName + "'!A1");
+        link.setAddress(String.format("'%s'!A1", sheetName));
         _currentCell.setCellValue(sheetName);
         _currentCell.setHyperlink(link);
         _currentCell.setCellStyle(createHyperlinkStyle());

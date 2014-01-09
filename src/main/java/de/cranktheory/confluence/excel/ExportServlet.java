@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel;
+package de.cranktheory.confluence.excel;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,23 +21,23 @@ import com.atlassian.confluence.pages.PageManager;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-import de.cranktheory.plugins.confluence.excel.export.ExportAllTheTables;
-import de.cranktheory.plugins.confluence.excel.export.ExportNamedMacro;
-import de.cranktheory.plugins.confluence.excel.export.ImageParser;
-import de.cranktheory.plugins.confluence.excel.export.TableParser;
-import de.cranktheory.plugins.confluence.excel.export.WorkbookExporter;
-import de.cranktheory.plugins.confluence.excel.export.xssf.XSSFWorkbookBuilder;
+import de.cranktheory.confluence.excel.export.ExportAllTheTables;
+import de.cranktheory.confluence.excel.export.ExportNamedMacro;
+import de.cranktheory.confluence.excel.export.ImageParserImpl;
+import de.cranktheory.confluence.excel.export.TableParser;
+import de.cranktheory.confluence.excel.export.WorkbookExporter;
+import de.cranktheory.confluence.excel.export.xssf.XSSFWorkbookBuilder;
 
-public class TableToExcelServlet extends HttpServlet
+public class ExportServlet extends HttpServlet
 {
     private static final long serialVersionUID = 4580469806768736781L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(TableToExcelServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExportServlet.class);
 
     private final PageManager _pageManager;
     private final XmlEventReaderFactory _xmlEventReaderFactory;
 
-    public TableToExcelServlet(PageManager pageManager, XmlEventReaderFactory xmlEventReaderFactory)
+    public ExportServlet(PageManager pageManager, XmlEventReaderFactory xmlEventReaderFactory)
     {
         _pageManager = pageManager;
         _xmlEventReaderFactory = xmlEventReaderFactory;
@@ -49,8 +50,8 @@ public class TableToExcelServlet extends HttpServlet
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new ExportAllTheTables(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(
-                page, _pageManager))));
+        convertTable(resp, page, ExportAllTheTables.newInstance(new XSSFWorkbookBuilder(),
+                TableParser.newInstance(ImageParserImpl.newInstance(page, _pageManager))));
     }
 
     @Override
@@ -61,8 +62,8 @@ public class TableToExcelServlet extends HttpServlet
 
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
-        convertTable(resp, page, new ExportNamedMacro(new XSSFWorkbookBuilder(), new TableParser(new ImageParser(page,
-                _pageManager)), sheetname));
+        convertTable(resp, page, ExportNamedMacro.newInstance(new XSSFWorkbookBuilder(),
+                TableParser.newInstance(ImageParserImpl.newInstance(page, _pageManager)), sheetname));
     }
 
     private static String getParameter(HttpServletRequest req, String name)
@@ -73,12 +74,18 @@ public class TableToExcelServlet extends HttpServlet
         return value;
     }
 
-    private void convertTable(HttpServletResponse resp, Page page, WorkbookExporter tableExporter)
+    private void convertTable(HttpServletResponse resp, Page page, WorkbookExporter exporter)
     {
+        Preconditions.checkNotNull(page, "page");
+
         try
         {
-            Workbook workbook = tableExporter.export(_xmlEventReaderFactory.createXMLEventReader(new StringReader(
-                    page.getBodyAsString()), XhtmlConstants.STORAGE_NAMESPACES, false));
+            String bodyAsString = page.getBodyAsString();
+            StringReader reader = new StringReader(bodyAsString);
+            XMLEventReader xmlEventReader = _xmlEventReaderFactory.createXMLEventReader(reader,
+                    XhtmlConstants.STORAGE_NAMESPACES, false);
+
+            Workbook workbook = exporter.export(xmlEventReader);
             resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
             String safePageTitle = page.getTitle()
@@ -91,7 +98,7 @@ public class TableToExcelServlet extends HttpServlet
         }
         catch (XMLStreamException e)
         {
-            LOG.error("Error while parsing Confluence Storage Format.", e);
+            LOG.error(String.format("Error while exporting tables of page '%s'.", page.getTitle()), e);
         }
         catch (IOException e)
         {

@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -9,6 +9,11 @@ import com.google.common.collect.ImmutableMap.Builder;
 public final class ImageUtils
 {
     private static final ImmutableMap<String, Integer> mimeTypeToPoiImageFormat;
+
+    private ImageUtils()
+    {
+        //Nope
+    }
 
     static
     {

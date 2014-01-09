@@ -4,13 +4,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.cranktheory.plugins.confluence</groupId>
+	<groupId>de.cranktheory.confluence</groupId>
 	<artifactId>export-table</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
 	<organization>
 		<name>Florian Herbel, Holger Steffan</name>
-		<url>http://www.example.com/</url>
+		<url>https://bitbucket.org/cranktheory/</url>
 	</organization>
 
 	<name>Export tables to Excel</name>
@@ -151,6 +151,7 @@
 		<confluence.data.version>5.4.1</confluence.data.version>
 		<amps.version>4.2.10</amps.version>
 		<plugin.testrunner.version>1.1.2</plugin.testrunner.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 </project>

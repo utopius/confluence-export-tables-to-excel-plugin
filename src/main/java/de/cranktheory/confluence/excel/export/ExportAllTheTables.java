@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -10,18 +10,25 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
-public class ExportNamedMacro implements WorkbookExporter
+/**
+ * Exports all tables on a Page.
+ */
+public class ExportAllTheTables implements WorkbookExporter
 {
-    private final WorkbookBuilder _builder;
-    private final TableParser _tableParser;
-    private final String _sheetToExport;
+    public static ExportAllTheTables newInstance(WorkbookBuilder builder, TableParser tableParser)
+    {
+        return new ExportAllTheTables(Preconditions.checkNotNull(builder, "builder"), Preconditions.checkNotNull(
+                tableParser, "tableParser"));
+    }
 
-    public ExportNamedMacro(WorkbookBuilder builder, TableParser tableParser, String sheetnameToExport)
+    private final WorkbookBuilder _builder;
+
+    private TableParser _tableParser;
+
+    private ExportAllTheTables(WorkbookBuilder builder, TableParser tableParser)
     {
         _builder = builder;
         _tableParser = tableParser;
-
-        _sheetToExport = Preconditions.checkNotNull(sheetnameToExport, "sheetToExport");
     }
 
     @Override
@@ -29,40 +36,32 @@ public class ExportNamedMacro implements WorkbookExporter
     {
         Preconditions.checkNotNull(reader, "reader");
 
+        int nonMacroTableCount = 0;
+
         while (reader.hasNext())
         {
             XMLEvent event = reader.nextEvent();
 
-            if (isExportTableMacro(event))
+            if (XMLEvents.isStartMacro(event, "structured-macro"))
             {
                 String sheetname = parseSheetname(reader);
 
-                if (_sheetToExport.equalsIgnoreCase(sheetname))
-                {
-                    parseMacro(reader, sheetname, _tableParser);
-                }
+                parseMacro(reader, sheetname, _tableParser);
+            }
+            else if (XMLEvents.isStart(event, "table"))
+            {
+                // Applies to all tables which are not enclosed in an export-table macro
+                ++nonMacroTableCount;
+                _tableParser.parseTable(reader, _builder, String.format("Table %s", nonMacroTableCount));
             }
         }
 
         return _builder.getWorkbook();
     }
 
-    private boolean isExportTableMacro(XMLEvent event)
-    {
-        if (XMLEvents.isStart(event, "structured-macro"))
-        {
-            Attribute macroNameAttribute = event.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/content}name"));
-
-            return "export-table".equals(macroNameAttribute.getValue());
-        }
-
-        return false;
-    }
-
     private String parseSheetname(XMLEventReader reader) throws XMLStreamException
     {
-        while (nextIsParameter(reader))
+        while (XMLEvents.nextIsParameter(reader))
         {
             do
             {
@@ -100,6 +99,7 @@ public class ExportNamedMacro implements WorkbookExporter
                 break;
             }
 
+            // TODO: Add support for nested export-table macros
             // final boolean foundNestedMacro = Util.isStart(event, "structured-macro");
             // if (foundNestedMacro)
             // {
@@ -113,10 +113,4 @@ public class ExportNamedMacro implements WorkbookExporter
         }
     }
 
-    private boolean nextIsParameter(XMLEventReader reader) throws XMLStreamException
-    {
-        XMLEvent peek = reader.peek();
-        boolean nextIsParameter = peek != null && XMLEvents.isStart(peek, "parameter");
-        return nextIsParameter;
-    }
 }

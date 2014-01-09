@@ -1,14 +1,21 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import com.google.common.base.Preconditions;
+
 public class TableParser
 {
+    public static TableParser newInstance(ImageParser imageParser)
+    {
+        return new TableParser(Preconditions.checkNotNull(imageParser, "imageParser"));
+    }
+
     private final ImageParser _imageParser;
 
-    public TableParser(ImageParser imageParser)
+    private TableParser(ImageParser imageParser)
     {
         _imageParser = imageParser;
     }

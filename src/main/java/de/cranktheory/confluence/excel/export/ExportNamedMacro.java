@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -10,16 +10,28 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import com.google.common.base.Preconditions;
 
-public class ExportAllTheTables implements WorkbookExporter
+/**
+ * Exports tables from a page which are decorated with the {@link ExportTableMacro}.
+ */
+public class ExportNamedMacro implements WorkbookExporter
 {
+    public static ExportNamedMacro newInstance(WorkbookBuilder builder, TableParser tableParser,
+            String sheetnameToExport)
+    {
+        return new ExportNamedMacro(Preconditions.checkNotNull(builder, "builder"), Preconditions.checkNotNull(
+                tableParser, "tableParser"), Preconditions.checkNotNull(sheetnameToExport, "sheetnameToExport"));
+    }
+
     private final WorkbookBuilder _builder;
+    private final TableParser _tableParser;
+    private final String _sheetToExport;
 
-    private TableParser _tableParser;
-
-    public ExportAllTheTables(WorkbookBuilder builder, TableParser tableParser)
+    private ExportNamedMacro(WorkbookBuilder builder, TableParser tableParser, String sheetnameToExport)
     {
         _builder = builder;
         _tableParser = tableParser;
+
+        _sheetToExport = Preconditions.checkNotNull(sheetnameToExport, "sheetToExport");
     }
 
     @Override
@@ -27,45 +39,27 @@ public class ExportAllTheTables implements WorkbookExporter
     {
         Preconditions.checkNotNull(reader, "reader");
 
-        int nonMacroTableCount = 0;
-
         while (reader.hasNext())
         {
             XMLEvent event = reader.nextEvent();
 
-            if (isExportTableMacro(event))
+            if (XMLEvents.isStartMacro(event, "export-table"))
             {
                 String sheetname = parseSheetname(reader);
 
-                parseMacro(reader, sheetname, _tableParser);
-            }
-            else if (XMLEvents.isStart(event, "table"))
-            {
-                // Applies to all tables which are not enclosed in an export-table macro
-                ++nonMacroTableCount;
-                _tableParser.parseTable(reader, _builder, String.format("Table %s", nonMacroTableCount));
+                if (_sheetToExport.equalsIgnoreCase(sheetname))
+                {
+                    parseMacro(reader, sheetname, _tableParser);
+                }
             }
         }
 
         return _builder.getWorkbook();
     }
 
-    private boolean isExportTableMacro(XMLEvent event)
-    {
-        if (XMLEvents.isStart(event, "structured-macro"))
-        {
-            Attribute macroNameAttribute = event.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/content}name"));
-
-            return "export-table".equals(macroNameAttribute.getValue());
-        }
-
-        return false;
-    }
-
     private String parseSheetname(XMLEventReader reader) throws XMLStreamException
     {
-        while (nextIsParameter(reader))
+        while (XMLEvents.nextIsParameter(reader))
         {
             do
             {
@@ -88,7 +82,7 @@ public class ExportAllTheTables implements WorkbookExporter
             } while (!XMLEvents.isEnd(reader.nextEvent(), "parameter"));
         }
 
-        throw new IllegalStateException(String.valueOf("No Macro parameter elements found."));
+        throw new IllegalStateException(String.valueOf("No Macro parameter elements found. To export a specific table you must set the parameter 'sheetname'."));
     }
 
     private void parseMacro(XMLEventReader reader, String sheetname, TableParser tableParser) throws XMLStreamException
@@ -115,12 +109,4 @@ public class ExportAllTheTables implements WorkbookExporter
             }
         }
     }
-
-    private boolean nextIsParameter(XMLEventReader reader) throws XMLStreamException
-    {
-        XMLEvent peek = reader.peek();
-        boolean nextIsParameter = peek != null && XMLEvents.isStart(peek, "parameter");
-        return nextIsParameter;
-    }
-
 }

@@ -1,7 +1,5 @@
 function exportTable(parent, pageId, sheetname, url)
 {
-    var detected = false;
-
     var table = jQuery(parent).find("table");
 
     var form = document.createElement("form");

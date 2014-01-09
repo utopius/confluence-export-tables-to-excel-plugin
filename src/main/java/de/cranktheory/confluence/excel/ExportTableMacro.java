@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.macro;
+package de.cranktheory.confluence.excel;
 
 import java.util.Map;
 
@@ -16,6 +16,9 @@ import com.atlassian.renderer.v2.RenderMode;
 import com.atlassian.renderer.v2.macro.BaseMacro;
 import com.atlassian.renderer.v2.macro.MacroException;
 
+/**
+ * Macro that allows to export a specific table on a Confluence page.
+ */
 public class ExportTableMacro extends BaseMacro implements Macro
 {
     // v2 Macro methods
@@ -29,7 +32,9 @@ public class ExportTableMacro extends BaseMacro implements Macro
         contextMap.put("buttonAbove", BooleanUtils.toBoolean(parameters.get("buttonAbove")));
         contextMap.put("sheetname", StringUtils.defaultString(parameters.get("sheetname"), "excel-export"));
 
-        long id = context.getPageContext().getEntity().getId();
+        long id = context.getPageContext()
+            .getEntity()
+            .getId();
         contextMap.put("pageId", id);
         String renderedTemplate = VelocityUtils.getRenderedTemplate("/templates/export-table-macro.vm", contextMap);
         return renderedTemplate;

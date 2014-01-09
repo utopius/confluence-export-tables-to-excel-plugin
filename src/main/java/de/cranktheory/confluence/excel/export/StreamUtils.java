@@ -1,4 +1,4 @@
-package de.cranktheory.plugins.confluence.excel.export;
+package de.cranktheory.confluence.excel.export;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,11 +10,16 @@ import com.google.common.base.Preconditions;
 
 public final class StreamUtils
 {
+    private StreamUtils()
+    {
+        // Nope
+    }
 
+    //TODO: Check if this is really necessary...ImageIO should work.
     static byte[] readAllBytes(InputStream inputStream) throws IOException
     {
         Preconditions.checkNotNull(inputStream, "inputStream");
-    
+
         // It was simply not possible to use ImageIO to load the image...
         // reading it manually using byte streams worked at least for pngs and jpgs
         BufferedInputStream in = new BufferedInputStream(inputStream);
@@ -32,5 +37,4 @@ public final class StreamUtils
         baos.close();
         return imageInByte;
     }
-
 }
