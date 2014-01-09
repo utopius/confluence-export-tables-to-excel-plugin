@@ -20,7 +20,7 @@ public class TableToExcelUnitTest extends XmlTest
 
         try
         {
-            Workbook export = target.export(openXmlFile("single_table.xml"));
+            Workbook export = target.export(createXmlReaderFromFile("single_table.xml"));
 
             Assert.assertEquals(1, export.getNumberOfSheets());
             Assert.assertEquals(1, export.getSheetAt(0)

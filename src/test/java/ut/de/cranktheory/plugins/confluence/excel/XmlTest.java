@@ -9,7 +9,7 @@ import com.google.common.base.Preconditions;
 
 public class XmlTest
 {
-    protected final XMLEventReader openXmlFile(String filename)
+    protected final XMLEventReader createXmlReaderFromFile(String filename)
     {
         Preconditions.checkNotNull(filename, "filename");
 
