@@ -10,7 +10,7 @@ import de.cranktheory.confluence.excel.export.ExportAllTheTables;
 import de.cranktheory.confluence.excel.export.TableParser;
 import de.cranktheory.confluence.excel.export.xssf.XSSFWorkbookBuilder;
 
-public class TableToExcelUnitTest extends XmlTest
+public class ExportAllTheTablesUnitTest extends XmlTest
 {
     @Test
     public void Given_a_single_table_Then_export_one_sheet_2_rows_And_4_cells()
