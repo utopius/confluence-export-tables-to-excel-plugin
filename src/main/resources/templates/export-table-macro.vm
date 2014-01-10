@@ -4,19 +4,23 @@ $body
 #else
 
 <div>
-    #if( $buttonAbove )
+    #if($buttonAbove)
         <button class="aui-button aui-button-subtle aui-button-compact noprint"
             onClick="exportTable(this.parentNode, '$pageId', '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
-            <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span>
-             $i18n.getText("de.cranktheory.confluence.excel.export.table")
+            <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone">Download </span>
+            $i18n.getText("de.cranktheory.confluence.excel.export.table")
         </button>
     #end
+
     $body
-    <button class="aui-button aui-button-subtle aui-button-compact noprint" style="margin: 10px 0px;"
-            onClick="exportTable(this.parentNode, '$pageId', '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
-            <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone"></span>
-             $i18n.getText("de.cranktheory.confluence.excel.export.table")
-    </button>
+
+    #if($buttonBelow)
+        <button class="aui-button aui-button-subtle aui-button-compact noprint" style="margin: 10px 0px;"
+                onClick="exportTable(this.parentNode, '$pageId', '$sheetname', '$req.getContextPath()/plugins/servlet/export-table')">
+                <span class="aui-icon aui-icon-small aui-iconfont-devtools-clone">Download </span>
+                <span>$i18n.getText("de.cranktheory.confluence.excel.export.table")</span>
+        </button>
+    #end
 </div>
 
 #end

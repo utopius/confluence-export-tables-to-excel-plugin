@@ -2,7 +2,6 @@ package de.cranktheory.confluence.excel;
 
 import java.util.Map;
 
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 
@@ -21,21 +20,31 @@ import com.atlassian.renderer.v2.macro.MacroException;
  */
 public class ExportTableMacro extends BaseMacro implements Macro
 {
-    // v2 Macro methods
+    public static enum ButtonLocation {
+        Above, Below, Both
+    }
 
+    // v2 Macro methods
     @Override
     public String execute(Map<String, String> parameters, String body, ConversionContext context)
             throws MacroExecutionException
     {
         VelocityContext contextMap = new VelocityContext(MacroUtils.defaultVelocityContext());
         contextMap.put("body", body);
-        contextMap.put("buttonAbove", BooleanUtils.toBoolean(parameters.get("buttonAbove")));
-        contextMap.put("sheetname", StringUtils.defaultString(parameters.get("sheetname"), "excel-export"));
 
         long id = context.getPageContext()
-            .getEntity()
-            .getId();
+                .getEntity()
+                .getId();
         contextMap.put("pageId", id);
+        contextMap.put("sheetname", StringUtils.defaultString(parameters.get("sheetname"), "excel-export"));
+
+        ButtonLocation buttonLocation = parameters.containsKey("button-location")
+                ? Enum.valueOf(ButtonLocation.class, parameters.get("button-location"))
+                : ButtonLocation.Below;
+
+        contextMap.put("buttonAbove", buttonLocation == ButtonLocation.Above || buttonLocation == ButtonLocation.Both);
+        contextMap.put("buttonBelow", buttonLocation == ButtonLocation.Below || buttonLocation == ButtonLocation.Both);
+
         String renderedTemplate = VelocityUtils.getRenderedTemplate("/templates/export-table-macro.vm", contextMap);
         return renderedTemplate;
     }
