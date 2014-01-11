@@ -43,7 +43,11 @@
 		<category name="reporting" />
 		<parameters>
 			<parameter name="sheetname" type="string" required="true"/>
-			<parameter name="buttonAbove" type="boolean" default="false" />
+			<parameter name="button-location" type="enum" default="Below">
+			    <value name="Above" />
+			    <value name="Below" />
+			    <value name="Both" />
+			</parameter>
 		</parameters>
 	</xhtml-macro>
 	<macro name="export-table"
