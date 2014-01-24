@@ -13,7 +13,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
-import de.cranktheory.confluence.excel.export.ExportAllTheTables;
 import de.cranktheory.confluence.excel.export.WorkbookExporter;
 
 public class XmlTest
@@ -29,7 +28,8 @@ public class XmlTest
             // A bit ugly to instantiate DefaultXmlEventReaderFactory directly, but as the Storage Format is decorated
             // by the event reader/factory/thingies of Confluence with necessary doctype and namespace declarations,
             // this is just plain necessary.
-            XMLEventReader xmlEventReader = new DefaultXmlEventReaderFactory().createXMLEventReader(reader,
+            DefaultXmlEventReaderFactory readerFactory = new DefaultXmlEventReaderFactory();
+            XMLEventReader xmlEventReader = readerFactory.createXMLEventReader(reader,
                     XhtmlConstants.STORAGE_NAMESPACES, false);
 
             return xmlEventReader;
