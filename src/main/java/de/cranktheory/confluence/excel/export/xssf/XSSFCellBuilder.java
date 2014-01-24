@@ -147,7 +147,7 @@ public class XSSFCellBuilder implements CellBuilder
 
         Hyperlink link = creationHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
         link.setAddress(String.format("'%s'!A1", sheetName));
-        _currentCell.setCellValue(sheetName);
+        _builder.append(" " + sheetName);
         _currentCell.setHyperlink(link);
 
         // cell style for hyperlinks
