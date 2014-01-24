@@ -37,7 +37,7 @@ public class ImageParserImpl implements ImageParser
     }
 
     @Override
-    public void parseImage(XMLEventReader reader, WorksheetBuilder sheetBuilder) throws XMLStreamException
+    public void parseImage(XMLEventReader reader, WorksheetBuilder sheetBuilder, CellBuilder cellBuilder) throws XMLStreamException
     {
         XMLEvent event = reader.nextEvent();
         if (XMLEvents.isStart(event, "attachment"))
@@ -59,7 +59,7 @@ public class ImageParserImpl implements ImageParser
             {
                 InputStream contentsAsStream = attachment.getContentsAsStream();
                 String contentType = attachment.getContentType();
-                sheetBuilder.drawPictureToCell(StreamUtils.readAllBytes(contentsAsStream),
+                cellBuilder.drawPictureToCell(StreamUtils.readAllBytes(contentsAsStream),
                         ImageUtils.mimeTypeToPoiFormat(contentType));
             }
             catch (PictureDrawingException e)

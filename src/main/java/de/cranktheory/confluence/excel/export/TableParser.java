@@ -51,8 +51,8 @@ public class TableParser
 
             if (XMLEvents.isStart(event, "th") || XMLEvents.isStart(event, "td"))
             {
-                sheetBuilder.createCell(cellIndex++);
-                parser.parseCell(reader, sheetBuilder, event.asStartElement());
+                CellBuilder cellBuilder = sheetBuilder.createCell(cellIndex++);
+                parser.parseCell(reader, sheetBuilder, cellBuilder, event.asStartElement());
             }
         }
     }
