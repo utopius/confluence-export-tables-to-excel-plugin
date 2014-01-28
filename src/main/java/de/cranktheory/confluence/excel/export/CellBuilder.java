@@ -1,23 +1,41 @@
 package de.cranktheory.confluence.excel.export;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public interface CellBuilder
 {
-
-    public abstract void build();
-
-    public abstract void appendText(String text);
-
-    public abstract void endListItem();
-
-    public abstract void startListItem();
-
-    public abstract void startUnorderedList();
-
-    public abstract void startOrderedList();
+    /**
+     * Start an unordered list in the {@link Cell}. Call {@link #startListItem()}, add the item with
+     * {@link #appendText(String)} and finish the item with {@link #endListItem()}.
+     */
+    void startUnorderedList();
 
     /**
+     * Start an ordered list in the {@link Cell}. Call {@link #startListItem()}, add the item with
+     * {@link #appendText(String)} and finish the item with {@link #endListItem()}.
+     */
+    void startOrderedList();
+
+    /**
+     * Starts a list item. Calls to {@link #appendText(String)} will be added to the current list item.
+     */
+    void startListItem();
+
+    /**
+     * Ends a list item.
+     */
+    void endListItem();
+
+    /**
+     * Appends the given <code>text</code> to the {@link Cell}.
+     *
+     * @param text the text to append.
+     */
+    void appendText(String text);
+
+    /**
+     *
      * Draws the given {@code imageInByte} to the current cell using the given {@code imageType}.
      *
      * @param imageInByte
@@ -36,4 +54,9 @@ public interface CellBuilder
      *            the name of the sheet to link to.
      */
     void setHyperlinkToSheet(String sheetName);
+
+    /**
+     * Writes the contents to the cell.
+     */
+    void build();
 }
