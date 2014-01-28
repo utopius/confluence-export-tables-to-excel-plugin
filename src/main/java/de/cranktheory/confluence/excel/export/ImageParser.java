@@ -6,6 +6,6 @@ import javax.xml.stream.XMLStreamException;
 public interface ImageParser
 {
 
-    void parseImage(XMLEventReader reader, WorksheetBuilder sheetBuilder) throws XMLStreamException;
+    void parseImage(XMLEventReader reader, WorksheetBuilder sheetBuilder, CellBuilder cellBuilder) throws XMLStreamException;
 
 }

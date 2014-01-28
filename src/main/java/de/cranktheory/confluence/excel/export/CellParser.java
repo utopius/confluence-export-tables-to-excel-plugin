@@ -6,8 +6,6 @@ import javax.xml.stream.events.EntityReference;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import com.google.common.base.Strings;
-
 public class CellParser
 {
     private final ParserFactory _factory;
@@ -20,16 +18,13 @@ public class CellParser
         _imageParser = factory.newImageParser();
     }
 
-    public void parseCell(XMLEventReader reader, WorksheetBuilder sheetBuilder, StartElement startElement)
-            throws XMLStreamException
+    public void parseCell(XMLEventReader reader, WorksheetBuilder sheetBuilder, CellBuilder cellBuilder,
+            StartElement startElement) throws XMLStreamException
     {
-        StringBuilder builder = new StringBuilder();
-
         while (reader.hasNext())
         {
             XMLEvent event = reader.nextEvent();
 
-            if (event == null) return;
             if (XMLEvents.isEnd(event, "th") || XMLEvents.isEnd(event, "td")) break;
 
             if (XMLEvents.isStart(event, "table"))
@@ -40,38 +35,50 @@ public class CellParser
 
                 _factory.newTableParser(newSheetName)
                     .parseTable(reader);
-                sheetBuilder.setHyperlinkToSheet(newSheetName);
+                cellBuilder.setHyperlinkToSheet(newSheetName);
             }
             else if (XMLEvents.isStart(event, "image"))
             {
-                _imageParser.parseImage(reader, sheetBuilder);
+                _imageParser.parseImage(reader, sheetBuilder, cellBuilder);
+            }
+            else if (XMLEvents.isStart(event, "ol"))
+            {
+                cellBuilder.startOrderedList();
+            }
+            else if (XMLEvents.isStart(event, "ul"))
+            {
+                cellBuilder.startUnorderedList();
+            }
+            if (XMLEvents.isStart(event, "li"))
+            {
+                cellBuilder.startListItem();
+            }
+            else if (XMLEvents.isEnd(event, "li"))
+            {
+                cellBuilder.endListItem();
             }
             else if (event.isCharacters() || event.isEntityReference())
             {
-                parseText(event, builder);
+                cellBuilder.appendText(parseText(event));
             }
         }
 
-        String cellValue = builder.toString();
-        if (!Strings.isNullOrEmpty(cellValue))
-        {
-            sheetBuilder.setCellText(cellValue);
-        }
+        cellBuilder.build();
     }
 
-    private void parseText(XMLEvent event, StringBuilder builder) throws XMLStreamException
+    private String parseText(XMLEvent event) throws XMLStreamException
     {
         if (event.isEntityReference())
         {
             EntityReference ref = (EntityReference) event;
-            builder.append(ref.getDeclaration()
-                .getReplacementText());
+            return ref.getDeclaration()
+                .getReplacementText();
         }
         else if (event.isCharacters())
         {
-            builder.append(event.asCharacters()
-                .getData());
-
+            return event.asCharacters()
+                .getData();
         }
+        return "";
     }
 }
