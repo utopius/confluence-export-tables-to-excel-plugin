@@ -23,4 +23,6 @@ public interface WorksheetBuilder
      *            Well, the index.
      */
     CellBuilder createCell(int index);
+
+    void build();
 }

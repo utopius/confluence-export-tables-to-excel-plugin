@@ -1,5 +1,8 @@
 package de.cranktheory.confluence.excel.export.xssf;
 
+import java.util.Iterator;
+
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -19,29 +22,30 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
                 workSheet, "workSheet"));
     }
 
-    private final XSSFWorkbook _workBook;
-    private final XSSFSheet _workSheet;
+    private final XSSFWorkbook _workbook;
+    private final XSSFSheet _sheet;
     private final XSSFDrawing _drawing;
 
     private XSSFRow _currentRow;
+    private int _lastColumnIndex = -1;
 
     private XSSFWorksheetBuilder(XSSFWorkbook workBook, XSSFSheet currentSheet)
     {
-        _workBook = workBook;
-        _workSheet = currentSheet;
-        _drawing = _workSheet.createDrawingPatriarch();
+        _workbook = workBook;
+        _sheet = currentSheet;
+        _drawing = _sheet.createDrawingPatriarch();
     }
 
     @Override
     public String getCurrentSheetname()
     {
-        return _workSheet.getSheetName();
+        return _sheet.getSheetName();
     }
 
     @Override
     public void createRow(int index)
     {
-        _currentRow = _workSheet.createRow(index);
+        _currentRow = _sheet.createRow(index);
     }
 
     @Override
@@ -50,6 +54,21 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
         Preconditions.checkState(_currentRow != null, "You have to call createRow first.");
 
         XSSFCell cell = _currentRow.createCell(index);
-        return new XSSFCellBuilder(_workBook, cell, _drawing);
+
+        if (index > _lastColumnIndex)
+        {
+            _lastColumnIndex = index;
+        }
+
+        return new XSSFCellBuilder(_workbook, cell, _drawing);
+    }
+
+    @Override
+    public void build()
+    {
+        for (int columnIndex = 0; columnIndex < _lastColumnIndex; ++columnIndex)
+        {
+            _sheet.autoSizeColumn(columnIndex);
+        }
     }
 }

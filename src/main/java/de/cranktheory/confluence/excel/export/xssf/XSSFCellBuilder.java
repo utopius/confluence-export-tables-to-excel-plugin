@@ -113,6 +113,7 @@ public class XSSFCellBuilder implements CellBuilder
 
         anchor.setCol1(columnIndex);
         anchor.setRow1(rowIndex);
+        anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
         anchor.setCol2(++columnIndex);
         anchor.setRow2(++rowIndex);
 

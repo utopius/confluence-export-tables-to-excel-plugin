@@ -27,7 +27,12 @@ public class TableParser
         {
             XMLEvent event = reader.nextEvent();
 
-            if (XMLEvents.isEnd(event, "table")) return;
+            if (XMLEvents.isEnd(event, "table")) {
+
+                sheetBuilder.build();
+
+                return;
+            }
 
             if (XMLEvents.isStart(event, "tr"))
             {
