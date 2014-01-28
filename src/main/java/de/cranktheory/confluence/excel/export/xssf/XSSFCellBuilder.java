@@ -4,7 +4,6 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
@@ -13,7 +12,6 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 import de.cranktheory.confluence.excel.export.CellBuilder;
 import de.cranktheory.confluence.excel.export.PictureDrawingException;
@@ -24,8 +22,8 @@ public class XSSFCellBuilder implements CellBuilder
 
     private final StringBuilder _builder = new StringBuilder();
     private final XSSFWorkbook _workbook;
-    private final XSSFCell _currentCell;
     private final XSSFDrawing _drawing;
+    private final XSSFCell _cell;
 
     private int _number = -1;
     private boolean _orderedList = false;
@@ -35,10 +33,10 @@ public class XSSFCellBuilder implements CellBuilder
     public XSSFCellBuilder(XSSFWorkbook workbook, XSSFCell cell, XSSFDrawing drawing)
     {
         _workbook = workbook;
-        _currentCell = cell;
+        _cell = cell;
         _drawing = drawing;
         _cellStyle = _workbook.createCellStyle();
-        _currentCell.setCellStyle(_cellStyle);
+
     }
 
     @Override
@@ -90,39 +88,19 @@ public class XSSFCellBuilder implements CellBuilder
     @Override
     public void build()
     {
-        String cellValue = _builder.toString();
-        if (!Strings.isNullOrEmpty(cellValue))
+        String cellValue = _builder.toString()
+            .trim();
+        if (!cellValue.isEmpty())
         {
-            setCellText(cellValue);
+            _cell.setCellValue(new XSSFRichTextString(cellValue));
+            _cell.setCellStyle(_cellStyle);
         }
-    }
-
-    private void setCellText(String cellValue)
-    {
-        Preconditions.checkState(_currentCell != null, "You have to call createCell first.");
-
-        _currentCell.setCellValue(new XSSFRichTextString(cellValue));
     }
 
     @Override
     public void drawPictureToCell(byte[] imageInByte, int imageType) throws PictureDrawingException
     {
-        Preconditions.checkState(_currentCell != null, "You have to call createCell first.");
-
-        ClientAnchor anchor = createAnchor(_currentCell);
-        int pictureIndex = _workbook.addPicture(imageInByte, imageType);
-        Picture pict = _drawing.createPicture(anchor, pictureIndex);
-        try
-        {
-            pict.resize();
-        }
-        catch (Exception e)
-        {
-            // pict.resize() is ugly, throwing NPEs without contextual information about the real
-            // error (thanks@Apache). Therefore we catch ALL exceptions here.
-            // TODO Add context info to exception like ImageIO registered readers, etc.
-            throw new PictureDrawingException("Error during picture drawing - resize failed", e);
-        }
+        _drawing.createPicture(createAnchor(_cell), _workbook.addPicture(imageInByte, imageType));
     }
 
     private ClientAnchor createAnchor(XSSFCell cell)
@@ -130,13 +108,14 @@ public class XSSFCellBuilder implements CellBuilder
         ClientAnchor anchor = _workbook.getCreationHelper()
             .createClientAnchor();
 
-        // TODO: Improve image anchoring
         int columnIndex = cell.getColumnIndex();
         int rowIndex = cell.getRowIndex();
+
         anchor.setCol1(columnIndex);
         anchor.setRow1(rowIndex);
-        anchor.setCol2(columnIndex + 1);
-        anchor.setRow2(rowIndex + 1);
+        anchor.setCol2(++columnIndex);
+        anchor.setRow2(++rowIndex);
+
         return anchor;
     }
 
@@ -148,7 +127,7 @@ public class XSSFCellBuilder implements CellBuilder
         Hyperlink link = creationHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
         link.setAddress(String.format("'%s'!A1", sheetName));
         _builder.append(" " + sheetName);
-        _currentCell.setHyperlink(link);
+        _cell.setHyperlink(link);
 
         // cell style for hyperlinks
         // by default hyperlinks are blue and underlined
@@ -157,6 +136,6 @@ public class XSSFCellBuilder implements CellBuilder
         hlinkFont.setColor(IndexedColors.BLUE.getIndex());
         _cellStyle.setFont(hlinkFont);
 
-        _currentCell.setCellStyle(_cellStyle);
+        _cell.setCellStyle(_cellStyle);
     }
 }

@@ -24,7 +24,6 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
     private final XSSFDrawing _drawing;
 
     private XSSFRow _currentRow;
-    private XSSFCell _currentCell;
 
     private XSSFWorksheetBuilder(XSSFWorkbook workBook, XSSFSheet currentSheet)
     {
@@ -50,7 +49,7 @@ public class XSSFWorksheetBuilder implements WorksheetBuilder
     {
         Preconditions.checkState(_currentRow != null, "You have to call createRow first.");
 
-        _currentCell = _currentRow.createCell(index);
-        return new XSSFCellBuilder(_workBook, _currentCell, _drawing);
+        XSSFCell cell = _currentRow.createCell(index);
+        return new XSSFCellBuilder(_workBook, cell, _drawing);
     }
 }
