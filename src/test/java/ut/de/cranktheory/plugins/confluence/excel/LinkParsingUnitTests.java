@@ -34,6 +34,22 @@ public class LinkParsingUnitTests extends XmlTest
     }
 
     @Test
+    public void Given_a_single_table_with_multiple_hyperlinks_in_one_cell_Then_the_last_link_wins()
+    {
+        XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();
+        ParserFactory parserFactory = createParserFactoryForLinkTests(builder);
+        ExportAllTheTables target = new ExportAllTheTables(builder, parserFactory);
+
+        Workbook export = export(target, "single_table_multiple_hyperlinks.xml");
+
+        //Fails because both link texts are appended to the cell, but the first link is lost (in transition ;) )
+        Assert.assertEquals("MySecondLink", export.getSheetAt(0)
+                .getRow(0)
+                .getCell(0)
+                .getStringCellValue());
+    }
+
+    @Test
     public void Given_a_single_table_with_pagelinks_Then_export_the_links_correctly()
     {
         XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();

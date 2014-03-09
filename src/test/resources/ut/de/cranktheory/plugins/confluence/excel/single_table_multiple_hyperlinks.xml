@@ -1,0 +1,10 @@
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<a href="http://localhost/mylink">MyLink</a>
+				<a href="http://localhost/mylink">MySecondLink</a>
+			</td>
+		</tr>
+	</tbody>
+</table>
