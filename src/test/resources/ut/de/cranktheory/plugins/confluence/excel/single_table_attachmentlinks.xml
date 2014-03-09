@@ -1,0 +1,10 @@
+<table>
+	<tbody>
+		<tr>
+			<td><ac:link><ri:attachment ri:filename="Filename.xml" /><ac:plain-text-link-body><![CDATA[MyFileLabel]]></ac:plain-text-link-body></ac:link></td>
+		</tr>
+		<tr>
+			<td><ac:link><ri:attachment ri:filename="Filename.xml" /></ac:link></td>
+		</tr>
+	</tbody>
+</table>

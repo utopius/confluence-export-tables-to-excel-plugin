@@ -11,4 +11,8 @@ public interface ParserFactory
     MacroParser newMacroParser();
 
     MacroParser newMacroParser(String sheetnameToExport);
+
+    LinkParser newLinkParser();
+
+    public abstract UrlResolver newUrlResolver();
 }

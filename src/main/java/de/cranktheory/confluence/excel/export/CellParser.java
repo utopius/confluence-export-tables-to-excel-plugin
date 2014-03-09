@@ -11,11 +11,13 @@ public class CellParser
     private final ParserFactory _factory;
     private final ImageParser _imageParser;
     private int _nestedTableCount = 0;
+    private LinkParser _linkParser;
 
-    public CellParser(ParserFactory factory)
+    public CellParser(ParserFactory factory, ImageParser imageParser, LinkParser linkParser)
     {
         _factory = factory;
-        _imageParser = factory.newImageParser();
+        _imageParser = imageParser;
+        _linkParser = linkParser;
     }
 
     public void parseCell(XMLEventReader reader, WorksheetBuilder sheetBuilder, CellBuilder cellBuilder,
@@ -56,6 +58,11 @@ public class CellParser
             else if (XMLEvents.isEnd(event, "li"))
             {
                 cellBuilder.endListItem();
+            }
+            else if(_linkParser.isLink(event))
+            {
+                Link link = _linkParser.parseLink(reader, event);
+                cellBuilder.setHyperlink(link);
             }
             else if (event.isCharacters() || event.isEntityReference())
             {

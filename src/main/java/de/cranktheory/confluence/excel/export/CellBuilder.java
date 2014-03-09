@@ -59,4 +59,6 @@ public interface CellBuilder
      * Writes the contents to the cell.
      */
     void build();
+
+    void setHyperlink(Link link);
 }

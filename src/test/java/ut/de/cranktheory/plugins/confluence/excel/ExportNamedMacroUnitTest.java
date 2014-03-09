@@ -16,7 +16,7 @@ public class ExportNamedMacroUnitTest extends XmlTest
     public void Given_a_single_table_Then_export_one_sheet_2_rows_And_4_cells()
     {
         XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();
-        ParserFactory parserFactory = new DefaultParserFactory(null, null, builder)
+        ParserFactory parserFactory = new DefaultParserFactory(null, null, builder, "")
         {
             public ImageParser newImageParser()
             {
@@ -38,7 +38,7 @@ public class ExportNamedMacroUnitTest extends XmlTest
     public void Given_a_single_table_with_an_Umlaut_sheetname_Then_export_one_sheet_2_rows_And_4_cells()
     {
         XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();
-        ParserFactory parserFactory = new DefaultParserFactory(null, null, builder)
+        ParserFactory parserFactory = new DefaultParserFactory(null, null, builder, "")
         {
             public ImageParser newImageParser()
             {

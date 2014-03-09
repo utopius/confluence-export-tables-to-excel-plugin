@@ -1,0 +1,10 @@
+<table>
+	<tbody>
+		<tr>
+			<td><ac:link><ri:page ri:content-title="ThisIsAPageTitle" /><ac:plain-text-link-body><![CDATA[MyLinkTitle]]></ac:plain-text-link-body></ac:link></td>
+		</tr>
+		<tr>
+			<td><ac:link><ri:page ri:content-title="ThisIsAPageTitle" /></ac:link></td>
+		</tr>
+	</tbody>
+</table>
