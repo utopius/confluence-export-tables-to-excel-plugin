@@ -3,7 +3,6 @@ package de.cranktheory.confluence.excel.export;
 import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
-import com.atlassian.confluence.util.GeneralUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 

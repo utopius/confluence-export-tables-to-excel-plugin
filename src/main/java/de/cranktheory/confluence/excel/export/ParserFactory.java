@@ -14,5 +14,5 @@ public interface ParserFactory
 
     LinkParser newLinkParser();
 
-    public abstract UrlResolver newUrlResolver();
+    UrlResolver newUrlResolver();
 }

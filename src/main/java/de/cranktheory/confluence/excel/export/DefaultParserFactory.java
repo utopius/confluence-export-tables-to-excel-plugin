@@ -2,7 +2,6 @@ package de.cranktheory.confluence.excel.export;
 
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
-import com.atlassian.confluence.util.GeneralUtil;
 
 public class DefaultParserFactory implements ParserFactory
 {
