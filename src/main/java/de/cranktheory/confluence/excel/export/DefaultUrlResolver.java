@@ -8,9 +8,9 @@ import com.google.common.base.Strings;
 
 public class DefaultUrlResolver implements UrlResolver
 {
-    private PageManager _pageManager;
-    private Page _page;
-    private String _baseUrl;
+    private final PageManager _pageManager;
+    private final Page _page;
+    private final String _baseUrl;
 
     public DefaultUrlResolver(PageManager pageManager, Page page, String baseUrl)
     {
@@ -27,6 +27,7 @@ public class DefaultUrlResolver implements UrlResolver
         Page referencedPage = _pageManager.getPage(spaceKey == null
                 ? _page.getSpaceKey()
                 : spaceKey, pageTitle);
+
         if (referencedPage == null) return null;
 
         return referencedPage.getUrlPath();
@@ -39,21 +40,23 @@ public class DefaultUrlResolver implements UrlResolver
 
         Attachment attachment = _page.getAttachmentNamed(attachmentFilename);
 
+        // caller seems to know a location
         if (pageTitle != null)
         {
-            // caller seems to know a location
-            Page page = _pageManager.getPage(spaceKey == null
-                    ? _page.getSpaceKey()
-                    : spaceKey, pageTitle);
+            String pageSpaceKey = spaceKey != null
+                    ? spaceKey
+                    : _page.getSpaceKey();
+
+            Page page = _pageManager.getPage(pageSpaceKey, pageTitle);
+
             attachment = page == null
                     ? null
                     : page.getAttachmentNamed(attachmentFilename);
         }
 
-        String urlPath = attachment == null
-                ? null
-                : attachment.getUrlPath();
-        return urlPath;
+        if(attachment == null) return null;
+
+        return attachment.getUrlPath();
     }
 
     @Override

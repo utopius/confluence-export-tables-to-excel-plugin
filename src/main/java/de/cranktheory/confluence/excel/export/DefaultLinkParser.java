@@ -9,17 +9,11 @@ import javax.xml.stream.events.XMLEvent;
 
 public class DefaultLinkParser implements LinkParser
 {
-    private UrlResolver _urlResolver;
+    private final UrlResolver _urlResolver;
 
     public DefaultLinkParser(UrlResolver urlResolved)
     {
         _urlResolver = urlResolved;
-    }
-
-    @Override
-    public boolean isLink(XMLEvent event)
-    {
-        return StorageFormat.isHyperlink(event) || StorageFormat.isStorageFormatLink(event);
     }
 
     @Override
@@ -43,12 +37,11 @@ public class DefaultLinkParser implements LinkParser
         }
         else if (StorageFormat.isStorageFormatLink(event) && StorageFormat.isPageLink(reader.peek()))
         {
-            // Process storage format link
-            StartElement linkContent = reader.nextEvent()
+            StartElement pageElement = reader.nextEvent()
                 .asStartElement();
-            // Attachment included from somewhere else
-            String pageTitle = StorageFormat.getPageTitle(linkContent);
-            String spaceKey = StorageFormat.getSpaceKey(linkContent);
+
+            String pageTitle = StorageFormat.getPageTitle(pageElement);
+            String spaceKey = StorageFormat.getSpaceKey(pageElement);
 
             String url = _urlResolver.toAbsoluteUrl(_urlResolver.resolvePageUrl(pageTitle, spaceKey));
             reader.nextEvent(); // navigate to the label
@@ -57,10 +50,8 @@ public class DefaultLinkParser implements LinkParser
         }
         else if (StorageFormat.isStorageFormatLink(event) && StorageFormat.isAttachmentLink(reader.peek()))
         {
-            StartElement linkContent = reader.nextEvent()
-                .asStartElement();
-
-            String attachmentFilename = StorageFormat.getAttachmentFilename(linkContent);
+            String attachmentFilename = StorageFormat.getAttachmentFilename(reader.nextEvent()
+                .asStartElement());
 
             String pageTitle = null;
             String spaceKey = null;
@@ -73,10 +64,11 @@ public class DefaultLinkParser implements LinkParser
                 pageTitle = StorageFormat.getPageTitle(pageElement);
                 spaceKey = StorageFormat.getSpaceKey(pageElement);
 
-                //Skip page end tag
+                // Skip page end tag
                 reader.nextEvent();
             }
-            String url = _urlResolver.toAbsoluteUrl(_urlResolver.resolveAttachmentUrl(attachmentFilename, pageTitle, spaceKey));
+            String url = _urlResolver.toAbsoluteUrl(_urlResolver.resolveAttachmentUrl(attachmentFilename, pageTitle,
+                    spaceKey));
             reader.nextEvent(); // navigate to the label
             String label = parseLabel(reader, attachmentFilename);
             return new Link(url, label);
@@ -85,7 +77,7 @@ public class DefaultLinkParser implements LinkParser
         return LinkParser.UnsupportedLink;
     }
 
-    public static String parseLabel(XMLEventReader reader, String defaultLabel) throws XMLStreamException
+    private static String parseLabel(XMLEventReader reader, String defaultLabel) throws XMLStreamException
     {
         if (XMLEvents.nextIs(reader, "plain-text-link-body"))
         {

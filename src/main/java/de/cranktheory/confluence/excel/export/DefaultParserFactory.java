@@ -7,8 +7,8 @@ public class DefaultParserFactory implements ParserFactory
 {
     private final PageManager _pageManager;
     private final Page _page;
-    private WorkbookBuilder _workbookBuilder;
-    private String _baseUrl;
+    private final WorkbookBuilder _workbookBuilder;
+    private final String _baseUrl;
 
     public DefaultParserFactory(PageManager pageManager, Page page, WorkbookBuilder workbookBuilder, String baseUrl)
     {

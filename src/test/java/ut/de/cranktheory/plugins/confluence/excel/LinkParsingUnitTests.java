@@ -27,10 +27,19 @@ public class LinkParsingUnitTests extends XmlTest
             .getRow(0)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(0)
+            .getCell(0)
+            .getHyperlink());
+
         Assert.assertEquals("MyLink", export.getSheetAt(0)
             .getRow(1)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(1)
+            .getCell(0)
+            .getHyperlink());
     }
 
     @Test
@@ -42,11 +51,15 @@ public class LinkParsingUnitTests extends XmlTest
 
         Workbook export = export(target, "single_table_multiple_hyperlinks.xml");
 
-        //Fails because both link texts are appended to the cell, but the first link is lost (in transition ;) )
+        // Fails because both link texts are appended to the cell, but the first link is lost (in transition ;) )
         Assert.assertEquals("MySecondLink", export.getSheetAt(0)
-                .getRow(0)
-                .getCell(0)
-                .getStringCellValue());
+            .getRow(0)
+            .getCell(0)
+            .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(0)
+            .getCell(0)
+            .getHyperlink());
     }
 
     @Test
@@ -62,10 +75,18 @@ public class LinkParsingUnitTests extends XmlTest
             .getRow(0)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(0)
+            .getCell(0)
+            .getHyperlink());
         Assert.assertEquals("ThisIsAPageTitle", export.getSheetAt(0)
             .getRow(1)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(1)
+            .getCell(0)
+            .getHyperlink());
     }
 
     @Test
@@ -81,10 +102,18 @@ public class LinkParsingUnitTests extends XmlTest
             .getRow(0)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(0)
+            .getCell(0)
+            .getHyperlink());
         Assert.assertEquals("Filename.xml", export.getSheetAt(0)
             .getRow(1)
             .getCell(0)
             .getStringCellValue());
+        Assert.assertNotNull(export.getSheetAt(0)
+            .getRow(1)
+            .getCell(0)
+            .getHyperlink());
     }
 
     private ParserFactory createParserFactoryForLinkTests(XSSFWorkbookBuilder builder)

@@ -59,7 +59,7 @@ public class CellParser
             {
                 cellBuilder.endListItem();
             }
-            else if(_linkParser.isLink(event))
+            else if(StorageFormat.isHyperlink(event) || StorageFormat.isStorageFormatLink(event))
             {
                 Link link = _linkParser.parseLink(reader, event);
                 cellBuilder.setHyperlink(link);

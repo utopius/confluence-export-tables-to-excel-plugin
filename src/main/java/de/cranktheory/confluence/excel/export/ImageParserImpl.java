@@ -3,10 +3,8 @@ package de.cranktheory.confluence.excel.export;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
 
 import org.slf4j.Logger;
@@ -42,10 +40,7 @@ public class ImageParserImpl implements ImageParser
         XMLEvent event = reader.nextEvent();
         if (XMLEvents.isStart(event, "attachment"))
         {
-            Attribute attributeByName = event.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/resource/identifier}filename"));
-
-            String attachmentFilename = attributeByName.getValue();
+            String attachmentFilename = StorageFormat.getAttachmentFilename(event);
 
             Attachment attachment = getAttachment(reader, attachmentFilename);
 
@@ -95,17 +90,8 @@ public class ImageParserImpl implements ImageParser
         if (XMLEvents.isStart(pageEvent, "page"))
         {
             // Attachment included from somewhere else
-            Attribute pageTitleAttribute = pageEvent.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/resource/identifier}content-title"));
-            String pageTitle = pageTitleAttribute.getValue();
-
-            Attribute spaceKeyAttribute = pageEvent.asStartElement()
-                .getAttributeByName(QName.valueOf("{http://atlassian.com/resource/identifier}space-key"));
-
-            // If no spaceKey is provided, then the referenced page is located in the same Space as _page
-            String spaceKey = spaceKeyAttribute == null
-                    ? _page.getSpaceKey()
-                    : spaceKeyAttribute.getValue();
+            String pageTitle = StorageFormat.getPageTitle(pageEvent);
+            String spaceKey = StorageFormat.getSpaceKey(pageEvent, _page.getSpaceKey());
 
             Page referencedPage = _pageManager.getPage(spaceKey, pageTitle);
 
