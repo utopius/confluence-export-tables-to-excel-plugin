@@ -18,10 +18,12 @@ import com.atlassian.confluence.content.render.xhtml.XhtmlConstants;
 import com.atlassian.confluence.content.render.xhtml.XmlEventReaderFactory;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
+import com.atlassian.confluence.util.GeneralUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import de.cranktheory.confluence.excel.export.DefaultParserFactory;
+import de.cranktheory.confluence.excel.export.ParserFactory;
 import de.cranktheory.confluence.excel.export.WorkbookExporter;
 import de.cranktheory.confluence.excel.export.xssf.XSSFWorkbookBuilder;
 
@@ -48,7 +50,8 @@ public class ExportServlet extends HttpServlet
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
         XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();
-        DefaultParserFactory factory = new DefaultParserFactory(_pageManager, page, builder);
+        ParserFactory factory = new DefaultParserFactory(_pageManager, page, builder, GeneralUtil.getGlobalSettings()
+                .getBaseUrl());
 
         convertTable(resp, page, new ExportAllTheTables(builder, factory));
     }
@@ -62,7 +65,8 @@ public class ExportServlet extends HttpServlet
         Page page = _pageManager.getPage(Long.parseLong(pageId));
 
         XSSFWorkbookBuilder builder = new XSSFWorkbookBuilder();
-        DefaultParserFactory factory = new DefaultParserFactory(_pageManager, page, builder);
+        ParserFactory factory = new DefaultParserFactory(_pageManager, page, builder, GeneralUtil.getGlobalSettings()
+                .getBaseUrl());
 
         convertTable(resp, page, new ExportNamedMacro(builder, factory, sheetname));
     }

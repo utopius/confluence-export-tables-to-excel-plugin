@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.common.base.Preconditions;
 
 import de.cranktheory.confluence.excel.export.CellBuilder;
+import de.cranktheory.confluence.excel.export.Link;
 import de.cranktheory.confluence.excel.export.PictureDrawingException;
 
 public class XSSFCellBuilder implements CellBuilder
@@ -129,6 +130,26 @@ public class XSSFCellBuilder implements CellBuilder
         link.setAddress(String.format("'%s'!A1", sheetName));
         _builder.append(" " + sheetName);
         _cell.setHyperlink(link);
+
+        // cell style for hyperlinks
+        // by default hyperlinks are blue and underlined
+        Font hlinkFont = _workbook.createFont();
+        hlinkFont.setUnderline(Font.U_SINGLE);
+        hlinkFont.setColor(IndexedColors.BLUE.getIndex());
+        _cellStyle.setFont(hlinkFont);
+
+        _cell.setCellStyle(_cellStyle);
+    }
+
+    @Override
+    public void setHyperlink(Link link)
+    {
+        XSSFCreationHelper creationHelper = _workbook.getCreationHelper();
+        Hyperlink hyperlink = creationHelper.createHyperlink(Hyperlink.LINK_URL);
+        hyperlink.setAddress(link.getUrl());
+        hyperlink.setLabel(link.getLabel());
+        _builder.append(link.getLabel());
+        _cell.setHyperlink(hyperlink);
 
         // cell style for hyperlinks
         // by default hyperlinks are blue and underlined

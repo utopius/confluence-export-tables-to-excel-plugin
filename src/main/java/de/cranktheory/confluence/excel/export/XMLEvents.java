@@ -58,4 +58,28 @@ public final class XMLEvents
         boolean nextIsParameter = next != null && isStart(next, "parameter");
         return nextIsParameter;
     }
+
+    public static boolean nextIsCharacters(XMLEventReader reader) throws XMLStreamException
+    {
+        return reader.peek() != null && reader.peek()
+            .isCharacters();
+    }
+
+    public static boolean nextIs(XMLEventReader reader, String searchedElement) throws XMLStreamException
+    {
+        Preconditions.checkNotNull(searchedElement, "searchedElement must not be null");
+
+        boolean hasNextElement = reader.peek() != null && reader.peek()
+            .isStartElement();
+
+        if (hasNextElement)
+        {
+            String elementName = reader.peek()
+                .asStartElement()
+                .getName()
+                .getLocalPart();
+            return searchedElement.equalsIgnoreCase(elementName);
+        }
+        return false;
+    }
 }
